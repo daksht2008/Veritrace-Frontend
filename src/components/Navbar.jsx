@@ -17,6 +17,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { ARBITRUM_SEPOLIA } from '../config'
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
 
 export default function Navbar() {
   const location = useLocation()
@@ -117,71 +118,33 @@ export default function Navbar() {
  * 4. Stores the connected account address in local state
  */
 function WalletButton() {
-  const [account, setAccount] = useState(null)
+  const { address, isConnected, chain } = useAccount()
+  const { connect, connectors } = useConnect()
+  const { disconnect } = useDisconnect()
+  const { switchChain } = useSwitchChain()
 
-  // ── On mount: check if already connected ──
+  // ── Automatically switch to Arbitrum Sepolia if connected to a different network ──
   useEffect(() => {
-    if (!window.ethereum) return
-
-    // Silently check for existing connection (no popup)
-    window.ethereum
-      .request({ method: 'eth_accounts' })
-      .then((accounts) => {
-        if (accounts.length > 0) setAccount(accounts[0])
-      })
-      .catch((err) => console.error('eth_accounts error:', err))
-
-    // ── Listen for account switches in MetaMask ──
-    const handleAccountsChanged = (accounts) => {
-      setAccount(accounts.length > 0 ? accounts[0] : null)
+    if (isConnected && chain && chain.id !== ARBITRUM_SEPOLIA.chainId) {
+      switchChain({ chainId: ARBITRUM_SEPOLIA.chainId })
     }
-    window.ethereum.on('accountsChanged', handleAccountsChanged)
+  }, [isConnected, chain, switchChain])
 
-    return () => {
-      window.ethereum.removeListener('accountsChanged', handleAccountsChanged)
-    }
-  }, [])
-
-  /**
-   * connectWallet — Triggers MetaMask connection popup.
-   * After connecting, attempts to switch to Arbitrum Sepolia.
-   */
   const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert('MetaMask is not installed! Please install it to use VeriTrace.')
+    if (isConnected) {
+      disconnect()
       return
     }
 
-    try {
-      // Request account access — this triggers the MetaMask popup
-      const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
-      })
-      setAccount(accounts[0])
+    // Find MetaMask first (EIP-6963), then generic injected, then any first available connector
+    const connectorToUse = connectors.find((c) => c.id === 'io.metamask')
+      || connectors.find((c) => c.id === 'injected')
+      || connectors[0]
 
-      // Attempt to switch to Arbitrum Sepolia network
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: ARBITRUM_SEPOLIA.chainIdHex }],
-        })
-      } catch (switchError) {
-        // If the chain hasn't been added to MetaMask, add it
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: ARBITRUM_SEPOLIA.chainIdHex,
-              chainName: ARBITRUM_SEPOLIA.name,
-              rpcUrls: [ARBITRUM_SEPOLIA.rpcUrl],
-              blockExplorerUrls: [ARBITRUM_SEPOLIA.explorer],
-              nativeCurrency: ARBITRUM_SEPOLIA.currency,
-            }],
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Wallet connection rejected:', error)
+    if (connectorToUse) {
+      connect({ connector: connectorToUse })
+    } else {
+      alert('MetaMask or another Web3 wallet is not installed. Please install a wallet to use VeriTrace.')
     }
   }
 
@@ -190,17 +153,17 @@ function WalletButton() {
 
   return (
     <button
-      className={`btn btn-wallet ${account ? 'connected' : ''}`}
+      className={`btn btn-wallet ${isConnected ? 'connected' : ''}`}
       onClick={connectWallet}
     >
-      {account ? (
+      {isConnected && address ? (
         <>
           {/* User icon */}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>
           </svg>
-          {formatAddress(account)}
+          {formatAddress(address)}
         </>
       ) : (
         <>

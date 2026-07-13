@@ -13,11 +13,13 @@
  * 
  * Deployed Contract: 0x468edc5b2fe9d1c919f2377cbe0ccb16f32ead29
  */
-import { ethers } from 'ethers'
 import FileUpload from '../components/FileUpload'
 import HashDisplay from '../components/HashDisplay'
 import SearchResults from '../components/SearchResults'
 import { useUpload } from '../context/UploadContext'
+import { readContract, getContractEvents } from '@wagmi/core'
+import { parseAbi } from 'viem'
+import { config } from '../wagmiConfig'
 import {
   HASH_ENGINE_API,
   CONTRACT_ADDRESS,
@@ -56,23 +58,17 @@ export default function VerifyPage() {
    */
   const queryBlockchainRegistry = async (sha256Hex) => {
     try {
-      // 1. Initialize provider (use Metamask if available, fallback to public Arbitrum RPC)
-      let provider
-      if (window.ethereum) {
-        provider = new ethers.BrowserProvider(window.ethereum)
-      } else {
-        provider = new ethers.JsonRpcProvider(ARBITRUM_SEPOLIA.rpcUrl)
-      }
-
-      // 2. Instantiate read-only contract instance
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
-
-      // 3. Prepare hex hash to match bytes32 parameter expectation
+      // 1. Prepare hex hash to match bytes32 parameter expectation
       const bytes32Hash = '0x' + sha256Hex
 
-      // 4. Call verifyContent(bytes32) on the contract
+      // 2. Call verifyContent(bytes32) on the contract using readContract
       // Returns: (address creator, uint64 timestamp, uint64 phash, string ipfs_cid, string ai_tool)
-      const record = await contract.verifyContent(bytes32Hash)
+      const record = await readContract(config, {
+        address: CONTRACT_ADDRESS,
+        abi: parseAbi(CONTRACT_ABI),
+        functionName: 'verifyContent',
+        args: [bytes32Hash],
+      })
       
       return {
         isRegistered: true,
@@ -184,28 +180,25 @@ export default function VerifyPage() {
 
       try {
         // Query blockchain events (just like the Library page) to fetch all registered visual hashes
-        let provider
-        if (window.ethereum) {
-          provider = new ethers.BrowserProvider(window.ethereum)
-        } else {
-          provider = new ethers.JsonRpcProvider(ARBITRUM_SEPOLIA.rpcUrl)
-        }
-
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
-        const filter = contract.filters.ContentRegistered()
-        const events = await contract.queryFilter(filter, 0, 'latest')
+        const events = await getContractEvents(config, {
+          address: CONTRACT_ADDRESS,
+          abi: parseAbi(CONTRACT_ABI),
+          eventName: 'ContentRegistered',
+          fromBlock: 0n,
+          toBlock: 'latest',
+        })
 
         // Loop through all registered logs and compute visual distance locally!
         if (hashData.phash) {
           const uploadedPhash = BigInt(hashData.phash)
 
           events.forEach(event => {
-            const args = event.args
-            const registeredSha = args[0]
-            const registeredCreator = args[1]
-            const registeredPhash = args[2] // uint64 BigInt representation
-            const registeredTime = Number(args[3])
-            const registeredAi = args[5]
+            const args = event.args || {}
+            const registeredSha = args.sha256hash
+            const registeredCreator = args.creator
+            const registeredPhash = args.phash || 0n
+            const registeredTime = Number(args.timestamp || 0n)
+            const registeredAi = args.aitool || ''
 
             // Skip if this is the exact same file (will be handled by the exact match display)
             const isExactSha = registeredSha.toLowerCase() === ('0x' + sha256Hex).toLowerCase()

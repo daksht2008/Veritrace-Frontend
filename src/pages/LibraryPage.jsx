@@ -12,8 +12,10 @@
  * Written for VeriTrace. Zero backend database dependencies.
  */
 import { useState, useEffect } from 'react'
-import { ethers } from 'ethers'
 import HashDisplay from '../components/HashDisplay'
+import { getContractEvents } from '@wagmi/core'
+import { parseAbi } from 'viem'
+import { config } from '../wagmiConfig'
 import {
   CONTRACT_ADDRESS,
   CONTRACT_ABI,
@@ -32,34 +34,27 @@ export default function LibraryPage() {
         setLoading(true)
         setError(null)
 
-        // 1. Establish provider (MetaMask if connected, fallback to public RPC)
-        let provider
-        if (window.ethereum) {
-          provider = new ethers.BrowserProvider(window.ethereum)
-        } else {
-          provider = new ethers.JsonRpcProvider(ARBITRUM_SEPOLIA.rpcUrl)
-        }
+        // 1. Query all historical "ContentRegistered" events
+        const events = await getContractEvents(config, {
+          address: CONTRACT_ADDRESS,
+          abi: parseAbi(CONTRACT_ABI),
+          eventName: 'ContentRegistered',
+          fromBlock: 0n,
+          toBlock: 'latest',
+        })
 
-        // 2. Instantiate read contract
-        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
-
-        // 3. Query all historical "ContentRegistered" events
-        // Filter: ContentRegistered(bytes32 indexed sha256hash, address indexed creator, uint64 phash, uint64 timestamp, string ipfsCid, string aitool)
-        const filter = contract.filters.ContentRegistered()
-        const events = await contract.queryFilter(filter, 0, 'latest')
-
-        // 4. Map events to user-friendly registration entries
+        // 2. Map events to user-friendly registration entries
         const parsedLogs = events.map(event => {
-          const args = event.args
+          const args = event.args || {}
           return {
-            sha256: args[0], // bytes32 sha256hash
-            creator: args[1], // address creator
-            phash: args[2].toString(), // uint64 phash
-            timestamp: Number(args[3]), // uint64 timestamp
-            ipfsCid: args[4], // string ipfsCid
-            aiTool: args[5], // string aitool
-            txHash: event.transactionHash, // Tx Hash of registration
-            blockNumber: event.blockNumber,
+            sha256: args.sha256hash,
+            creator: args.creator,
+            phash: args.phash?.toString() || '0',
+            timestamp: Number(args.timestamp || 0n),
+            ipfsCid: args.ipfsCid || '',
+            aiTool: args.aitool || '',
+            txHash: event.transactionHash,
+            blockNumber: Number(event.blockNumber),
           }
         })
 

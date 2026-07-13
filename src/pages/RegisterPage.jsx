@@ -19,10 +19,12 @@
  *   - Hash Engine API at api.hash.veritrace.dpkvtrading.online
  *   - VeritraceRegistry contract at 0x468edc5b2fe9d1c919f2377cbe0ccb16f32ead29
  */
-import { ethers } from 'ethers'
 import FileUpload from '../components/FileUpload'
 import HashDisplay from '../components/HashDisplay'
 import { useUpload } from '../context/UploadContext'
+import { useAccount, useWriteContract, useConfig } from 'wagmi'
+import { waitForTransactionReceipt } from '@wagmi/core'
+import { parseAbi } from 'viem'
 import {
   HASH_ENGINE_API,
   CONTRACT_ADDRESS,
@@ -59,6 +61,10 @@ export default function RegisterPage() {
     regTxResult: txResult, setRegTxResult: setTxResult,
     regError: error, setRegError: setError,
   } = useUpload()
+
+  const { isConnected, chain } = useAccount()
+  const { writeContractAsync } = useWriteContract()
+  const config = useConfig()
 
   /**
    * handleFileSelected — Called when user picks a file.
@@ -160,9 +166,9 @@ export default function RegisterPage() {
   const handleRegister = async () => {
     setError(null)
 
-    // ── Check MetaMask is available ──
-    if (!window.ethereum) {
-      setError('MetaMask is not installed. Please install it to register content.')
+    // ── Check Wallet is connected ──
+    if (!isConnected) {
+      setError('Wallet is not connected. Please connect your wallet in the navigation bar.')
       return
     }
 
@@ -170,67 +176,52 @@ export default function RegisterPage() {
       setSigning(true)
       setStep(3)
 
-      // ── Create ethers.js provider and signer from MetaMask ──
-      const provider = new ethers.BrowserProvider(window.ethereum)
-      const signer = await provider.getSigner()
-
       // ── Verify we're on Arbitrum Sepolia ──
-      const network = await provider.getNetwork()
-      if (Number(network.chainId) !== ARBITRUM_SEPOLIA.chainId) {
+      if (chain && chain.id !== ARBITRUM_SEPOLIA.chainId) {
         // Attempt to switch networks
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: ARBITRUM_SEPOLIA.chainIdHex }],
-          })
-        } catch (switchErr) {
-          throw new Error('Please switch to Arbitrum Sepolia network in MetaMask.')
+        if (window.ethereum) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: ARBITRUM_SEPOLIA.chainIdHex }],
+            })
+          } catch (switchErr) {
+            throw new Error('Please switch to Arbitrum Sepolia network in MetaMask.')
+          }
+        } else {
+          throw new Error('Please switch to Arbitrum Sepolia network in your wallet.')
         }
       }
-
-      // ── Create contract instance ──
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer)
 
       /**
        * Prepare the sha256 hash as bytes32:
        * The hash engine returns a plain hex string like "a7ffc6f8bf1ed766..."
-       * We need to prefix it with "0x" for ethers.js to parse it as bytes32.
+       * We need to prefix it with "0x" to parse it as bytes32.
        */
       const cleanHash = hashes.sha256.startsWith('0x') ? hashes.sha256.slice(2) : hashes.sha256
       const sha256Bytes32 = '0x' + cleanHash
 
-      // ── Send the transaction ──
-      // registerContent(bytes32 sha256hash, uint64 phash, string ipfs_cid, string ai_tool)
-      
-      // Fetch latest network fee details to bypass Arbitrum Sepolia gas price spikes
-      const feeData = await provider.getFeeData()
-      const multiplier = 150n // Apply a 1.5x safety buffer to base fees
-      
-      const safeMaxFee = feeData.maxFeePerGas 
-        ? (feeData.maxFeePerGas * multiplier) / 100n 
-        : undefined
-        
-      const safePriorityFee = feeData.maxPriorityFeePerGas 
-        ? (feeData.maxPriorityFeePerGas * multiplier) / 100n 
-        : undefined
-
-      const tx = await contract.registerContent(
-        sha256Bytes32,                            // SHA-256 hash as bytes32
-        hashes.phash ? BigInt(hashes.phash) : 0n, // Actual perceptual visual hash
-        '',                                       // IPFS CID — placeholder for MVP
-        aiTool || '',                             // AI tool attribution
-        {
-          maxFeePerGas: safeMaxFee,
-          maxPriorityFeePerGas: safePriorityFee,
-        }
-      )
+      // ── Send the transaction via Wagmi writeContractAsync ──
+      const txHash = await writeContractAsync({
+        address: CONTRACT_ADDRESS,
+        abi: parseAbi(CONTRACT_ABI),
+        functionName: 'registerContent',
+        args: [
+          sha256Bytes32,
+          hashes.phash ? BigInt(hashes.phash) : 0n,
+          '',
+          aiTool || '',
+        ],
+      })
 
       // ── Wait for transaction confirmation ──
-      const receipt = await tx.wait()
+      const receipt = await waitForTransactionReceipt(config, {
+        hash: txHash,
+      })
 
       setTxResult({
-        hash: receipt.hash,
-        blockNumber: receipt.blockNumber,
+        hash: receipt.transactionHash,
+        blockNumber: Number(receipt.blockNumber),
       })
       setStep(4)
     } catch (err) {
@@ -240,8 +231,8 @@ export default function RegisterPage() {
       let message = err.message
       if (message.includes('ContentAlreadyRegistered')) {
         message = 'This content hash is already registered on the blockchain.'
-      } else if (message.includes('user rejected')) {
-        message = 'Transaction was rejected in MetaMask.'
+      } else if (message.includes('user rejected') || message.includes('User rejected')) {
+        message = 'Transaction was rejected in your wallet.'
       } else if (message.includes('insufficient funds')) {
         message = 'Insufficient ETH for gas. Get free testnet ETH from the Lampros DAO Faucet.'
       }
