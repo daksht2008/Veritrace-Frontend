@@ -162,12 +162,79 @@ export default function VerifyPage() {
       }
 
       // ─────────────────────────────────────────────────────────────
-      // STAGE 4: Query Core Backend for Exact & Fuzzy Database Records
+      // STAGE 4: Decentralized On-Chain Fuzzy Similarity Matching (Frontend-Only)
       // ─────────────────────────────────────────────────────────────
       const matches = []
 
-      // If we got blockchain record, add it as a confirmed exact match
-      if (onChainData) {
+      // Helper function to calculate Hamming Distance between two BigInt values
+      const getHammingDistance = (a, b) => {
+        let xor = BigInt(a) ^ BigInt(b)
+        let dist = 0
+        while (xor > 0n) {
+          if (xor & 1n) dist++
+          xor >>= 1n
+        }
+        return dist
+      }
+
+      // Helper function to calculate similarity percentage based on Hamming Distance
+      const getSimilarityScore = (dist) => {
+        return 100 - (dist / 64) * 100
+      }
+
+      try {
+        // Query blockchain events (just like the Library page) to fetch all registered visual hashes
+        let provider
+        if (window.ethereum) {
+          provider = new ethers.BrowserProvider(window.ethereum)
+        } else {
+          provider = new ethers.JsonRpcProvider(ARBITRUM_SEPOLIA.rpcUrl)
+        }
+
+        const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider)
+        const filter = contract.filters.ContentRegistered()
+        const events = await contract.queryFilter(filter, 0, 'latest')
+
+        // Loop through all registered logs and compute visual distance locally!
+        if (hashData.phash) {
+          const uploadedPhash = BigInt(hashData.phash)
+
+          events.forEach(event => {
+            const args = event.args
+            const registeredSha = args[0]
+            const registeredCreator = args[1]
+            const registeredPhash = args[2] // uint64 BigInt representation
+            const registeredTime = Number(args[3])
+            const registeredAi = args[5]
+
+            // Skip if this is the exact same file (will be handled by the exact match display)
+            const isExactSha = registeredSha.toLowerCase() === ('0x' + sha256Hex).toLowerCase()
+
+            if (registeredPhash !== 0n) {
+              const distance = getHammingDistance(uploadedPhash, registeredPhash)
+              const score = getSimilarityScore(distance)
+
+              // If similarity is >= 80% (same logic as the backend BoltDB threshold)
+              if (score >= 80) {
+                matches.push({
+                  matchType: isExactSha ? 'exact' : 'similar',
+                  similarity: score,
+                  assetId: registeredSha.slice(0, 16),
+                  mediaType: hashData.media_type || 'unknown',
+                  registeredAt: new Date(registeredTime * 1000).toLocaleString(),
+                  creator: registeredCreator,
+                  aiTool: registeredAi,
+                })
+              }
+            }
+          })
+        }
+      } catch (logErr) {
+        console.error('On-chain fuzzy search lookup failed:', logErr)
+      }
+
+      // If we got blockchain record via exact match and it wasn't caught in the loop above
+      if (onChainData && matches.filter(m => m.matchType === 'exact').length === 0) {
         matches.push({
           matchType: 'exact',
           similarity: 100,
@@ -175,17 +242,22 @@ export default function VerifyPage() {
           mediaType: hashData.media_type || 'unknown',
           registeredAt: new Date(onChainData.timestamp * 1000).toLocaleString(),
           creator: onChainData.creator,
+          aiTool: onChainData.aiTool,
         })
       }
 
+      // ─────────────────────────────────────────────────────────────
+      // STAGE 5: Query Core Backend for Database Records (Fallback/Crosscheck)
+      // ─────────────────────────────────────────────────────────────
       try {
         // Query Core Backend Exact Match Database
         const exactRes = await fetch(`${CORE_BACKEND_API}/api/v1/verify/exact?hash=0x${sha256Hex}`)
         if (exactRes.ok) {
           const exactData = await exactRes.json()
           if (exactData.match_found && exactData.record) {
-            // Only add if not already added by blockchain
-            if (!onChainData) {
+            // Only add if not already in matches list
+            const alreadyMatched = matches.some(m => m.assetId.toLowerCase().includes(sha256Hex.slice(0, 8).toLowerCase()))
+            if (!alreadyMatched) {
               matches.push({
                 matchType: 'exact',
                 similarity: 100,
@@ -193,12 +265,13 @@ export default function VerifyPage() {
                 mediaType: hashData.media_type || 'unknown',
                 registeredAt: new Date(exactData.record.Timestamp * 1000).toLocaleString(),
                 creator: exactData.record.CreatorAddress,
+                aiTool: exactData.record.AiTool,
               })
             }
           }
         }
       } catch (dbErr) {
-        console.warn('Core Backend exact match lookup failed (using blockchain registry fallback):', dbErr.message)
+        console.warn('Core Backend exact match lookup failed:', dbErr.message)
       }
 
       try {
