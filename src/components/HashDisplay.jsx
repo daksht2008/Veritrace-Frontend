@@ -33,8 +33,8 @@ export default function HashDisplay({ label, hash, icon, variant }) {
 
   // ── Color schemes for the icon badge ──
   const variantColors = {
-    crypto:     { bg: '#e8f4fd', icon: '#0784c3' },
-    perceptual: { bg: '#e6faf5', icon: '#00c9a7' },
+    crypto:     { bg: 'var(--color-accent-bg)', icon: 'var(--color-accent)' },
+    perceptual: { bg: 'var(--color-success-bg)', icon: 'var(--color-success)' },
   }
   const colors = variantColors[variant] || variantColors.crypto
 

@@ -18,6 +18,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { ARBITRUM_SEPOLIA } from '../config'
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
+import ThemeToggle from './ThemeToggle'
 
 export default function Navbar() {
   const location = useLocation()
@@ -93,7 +94,8 @@ export default function Navbar() {
         </ul>
 
         {/* ── Wallet + Mobile Toggle ── */}
-        <div className="nav-actions">
+        <div className="nav-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <ThemeToggle />
           <WalletButton />
           <button
             className="nav-toggle"
@@ -251,8 +253,8 @@ export function LogoIcon({ size = 30, className = "" }) {
     >
       <defs>
         <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#2563eb" />
-          <stop offset="100%" stopColor="#10b981" />
+          <stop offset="0%" stopColor="var(--logo-grad-start)" />
+          <stop offset="100%" stopColor="var(--logo-grad-stop)" />
         </linearGradient>
       </defs>
       

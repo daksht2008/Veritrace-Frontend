@@ -494,7 +494,7 @@ export default function VerifyPage() {
           {(blockchainRecord || loading) && (
             <div className="card animate-slide-up" style={{ borderColor: blockchainRecord ? 'var(--color-success)' : 'var(--color-border)' }}>
               <div className="card-header" style={{ background: blockchainRecord ? 'var(--color-success-bg)' : 'var(--color-bg)' }}>
-                <h2 className="card-header-title" style={{ color: blockchainRecord ? '#0a7c65' : 'inherit' }}>
+                <h2 className="card-header-title" style={{ color: blockchainRecord ? 'var(--color-success)' : 'inherit' }}>
                   🛡️ On-Chain Smart Contract Proof
                 </h2>
                 {blockchainRecord && <span className="badge badge-success">Verified Original</span>}
