@@ -310,11 +310,23 @@ export default function VerifyPage() {
       }
 
       try {
-        // Query Core Backend Similarity Matches (Segmented check for Videos/Docs, Fuzzy check for Images)
-        const isVideoOrDoc = hashData.media_type === 'video' || hashData.media_type === 'document'
-        
-        if (isVideoOrDoc && hashData.keyframes && hashData.keyframes.length > 0) {
-          // Query Segment Match for multi-page documents or video segments
+        // Build the segments payload. For videos/docs, it's an array of keyframes. For images, it's a single keyframe.
+        let segmentsPayload = [];
+        if (hashData.keyframes && hashData.keyframes.length > 0) {
+          segmentsPayload = hashData.keyframes.map(k => ({
+            offset: Number(k.offset),
+            phash: Number(k.phash),
+            semantic_hash: k.semantic_hash || [],
+          }));
+        } else if (hashData.phash) {
+          segmentsPayload = [{
+            offset: 0,
+            phash: Number(hashData.phash),
+            semantic_hash: hashData.semantic_hash || [],
+          }];
+        }
+
+        if (segmentsPayload.length > 0) {
           const segmentRes = await fetch(`${CORE_BACKEND_API}/api/v1/verify/segments`, {
             method: 'POST',
             headers: {
@@ -323,17 +335,14 @@ export default function VerifyPage() {
             body: JSON.stringify({
               sha256: sha256Bytes32,
               media_type: hashData.media_type,
-              segments: hashData.keyframes.map(k => ({
-                offset: Number(k.offset),
-                phash: Number(k.phash)
-              })),
+              segments: segmentsPayload,
             }),
-          })
+          });
 
           if (segmentRes.ok) {
-            const segmentData = await segmentRes.json()
+            const segmentData = await segmentRes.json();
             if (segmentData.match_found && segmentData.record) {
-              const alreadyMatched = matches.some(m => m.assetId.toLowerCase().includes(segmentData.record.Sha256Hash?.slice(0, 8).toLowerCase()))
+              const alreadyMatched = matches.some(m => m.assetId.toLowerCase().includes(segmentData.record.Sha256Hash?.slice(0, 8).toLowerCase()));
               if (!alreadyMatched) {
                 matches.push({
                   matchType: 'similar',
@@ -347,31 +356,7 @@ export default function VerifyPage() {
                   ipfsCid: segmentData.record.IpfsCid,
                   mediaS3Url: segmentData.record.MediaS3Url,
                   mediaIpfsUrl: segmentData.record.MediaIpfsUrl,
-                })
-              }
-            }
-          }
-        } else if (hashData.phash) {
-          // Query Fuzzy Visual Search for single images
-          const fuzzyRes = await fetch(`${CORE_BACKEND_API}/api/v1/verify/fuzzy?phash=${hashData.phash}`)
-          if (fuzzyRes.ok) {
-            const fuzzyData = await fuzzyRes.json()
-            if (fuzzyData.match_found && fuzzyData.record) {
-              const alreadyMatched = matches.some(m => m.assetId.toLowerCase().includes(fuzzyData.record.Sha256Hash?.slice(0, 8).toLowerCase()))
-              if (!alreadyMatched) {
-                matches.push({
-                  matchType: 'similar',
-                  similarity: fuzzyData.similarity || 90,
-                  assetId: fuzzyData.record.Sha256Hash?.slice(0, 16),
-                  sha256: fuzzyData.record.Sha256Hash,
-                  mediaType: hashData.media_type || 'unknown',
-                  registeredAt: new Date(fuzzyData.record.Timestamp * 1000).toLocaleString(),
-                  creator: fuzzyData.record.CreatorAddress,
-                  aiTool: fuzzyData.record.AiTool,
-                  ipfsCid: fuzzyData.record.IpfsCid,
-                  mediaS3Url: fuzzyData.record.MediaS3Url,
-                  mediaIpfsUrl: fuzzyData.record.MediaIpfsUrl,
-                })
+                });
               }
             }
           }
