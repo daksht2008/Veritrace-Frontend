@@ -153,17 +153,22 @@ button { cursor: pointer; font-family: inherit; }
 .marquee-banner {
   background: linear-gradient(90deg, #0784c3, #1e2022, #0784c3);
   overflow: hidden;
-  white-space: nowrap;
   padding: 0.375rem 0;
   font-size: 0.75rem;
   font-weight: 600;
   color: rgba(255,255,255,0.9);
 }
 .marquee-track {
-  display: inline-block;
-  animation: marquee-scroll 22s linear infinite;
+  display: flex;
+  width: max-content;
+  gap: 4rem; /* Spacing between scrolling blocks */
+  animation: marquee-scroll 25s linear infinite;
 }
 .marquee-banner:hover .marquee-track { animation-play-state: paused; }
+.marquee-content {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .marquee-content a {
   color: #6ee7b7;
   text-decoration: underline;
@@ -171,8 +176,8 @@ button { cursor: pointer; font-family: inherit; }
 }
 .marquee-content a:hover { color: #a7f3d0; }
 @keyframes marquee-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-33.33%); }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(calc(-50% - 2rem), 0, 0); } /* Offset half the track plus half the gap width */
 }
 
 /* ── Navbar ── */
