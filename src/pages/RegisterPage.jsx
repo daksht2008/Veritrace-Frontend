@@ -508,6 +508,14 @@ export default function RegisterPage() {
                         <span style={{ color: 'var(--color-text-muted)' }}>Hash Units: </span>
                         <span>{hashes.hashCount}</span>
                       </div>
+                      {hashes.aiConfidenceScore !== undefined && hashes.aiConfidenceScore !== null && (
+                        <div>
+                          <span style={{ color: 'var(--color-text-muted)' }}>AI Detection Score: </span>
+                          <span style={{ fontWeight: 600, color: maxConf > 0.75 ? 'var(--color-error)' : 'var(--color-success)' }}>
+                            {Math.round(maxConf * 100)}%
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Collapsible Keyframes Signatures List */}
