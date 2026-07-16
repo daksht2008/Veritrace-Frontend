@@ -12,26 +12,19 @@
 // API Endpoints (deployed backends)
 // ─────────────────────────────────────────────────────────────
 
-const isLocal = typeof window !== 'undefined' && 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.'));
-
 /** 
  * Hash Engine API — Handles file upload, SHA-256 computation, and 
  * perceptual hashing. Built in Go with BoltDB local storage.
  * Endpoints: POST /api/v1/register, POST /api/v1/verify
  */
-export const HASH_ENGINE_API = isLocal
-  ? 'http://localhost:8081'
-  : 'https://api.hash.veritrace.dpkvtrading.online';
+export const HASH_ENGINE_API = 'https://api.hash.veritrace.dpkvtrading.online';
 
 /**
  * Core Backend API — Orchestration layer connecting on-chain registry,
  * PostgreSQL metadata, Redis cache, and Qdrant vector search.
  * Endpoints: GET /api/v1/verify/exact?hash=, GET /api/v1/verify/fuzzy?phash=
  */
-export const CORE_BACKEND_API = isLocal
-  ? 'http://localhost:8080'
-  : 'https://api.veritrace.dpkvtrading.online';
+export const CORE_BACKEND_API = 'https://api.veritrace.dpkvtrading.online';
 
 // ─────────────────────────────────────────────────────────────
 // Smart Contract (Arbitrum Sepolia)
