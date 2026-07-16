@@ -142,7 +142,7 @@ export default function VerifyPage() {
         {/* LEFT */}
         <div className="flex flex-col gap-5">
           <SpotlightCard>
-            <Card>
+            <Card className="card-hover-glow">
               <CardHeader><CardTitle><Search size={16} className="text-[#12AAFF]" /> Upload File to Verify</CardTitle></CardHeader>
               <CardBody><FileUpload onFileSelected={handleFileSelected} label="Drop a file to check against the VeriTrace registry" /></CardBody>
             </Card>
@@ -151,7 +151,7 @@ export default function VerifyPage() {
           <AnimatePresence>
             {(localSha256 || loading) && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-                <Card>
+                <Card className="card-hover-glow">
                   <CardHeader><CardTitle>Computed Fingerprints</CardTitle></CardHeader>
                   <CardBody className="flex flex-col gap-3">
                     {loading && !localSha256 ? <div className="skeleton h-9 rounded-lg w-full" /> : (
@@ -166,7 +166,7 @@ export default function VerifyPage() {
             )}
           </AnimatePresence>
 
-          <Card>
+          <Card className="card-hover-glow">
             <CardHeader><CardTitle><Info size={16} className="text-[#12AAFF]" /> Understanding Results</CardTitle></CardHeader>
             <CardBody className="text-xs flex flex-col gap-2.5">
               <div className="flex items-start gap-3"><Badge variant="success" className="flex-shrink-0 mt-0.5">100%</Badge><div><strong className="text-[var(--text)]">Exact Match</strong> — Cryptographic hashes are identical. Byte-for-byte match with the registered original.</div></div>
@@ -181,7 +181,7 @@ export default function VerifyPage() {
           <AnimatePresence>
             {(blockchainRecord || loading) && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-                <Card className={blockchainRecord ? 'border-[var(--success-border)]' : ''}>
+                <Card className={`card-hover-glow ${blockchainRecord ? 'border-[var(--success-border)]' : ''}`}>
                   <CardHeader className={blockchainRecord ? 'bg-[var(--success-bg)]' : ''}>
                     <CardTitle className={blockchainRecord ? 'text-[#00D395]' : ''}><Shield size={16} /> On-Chain Smart Contract Proof</CardTitle>
                     {blockchainRecord && <Badge variant="success">Verified Original</Badge>}
@@ -204,7 +204,7 @@ export default function VerifyPage() {
           </AnimatePresence>
 
           <SpotlightCard>
-            <Card>
+            <Card className="card-hover-glow card-border-animate">
               <CardHeader>
                 <CardTitle><Database size={16} className="text-[#12AAFF]" /> Database Similarity Results</CardTitle>
                 {dbResults?.length > 0 && <Badge variant="arb">{dbResults.length} matches</Badge>}
@@ -218,7 +218,15 @@ export default function VerifyPage() {
                         <Progress value={uploadProgress} />
                       </>
                     ) : (
-                      <div className="text-center py-4"><Spinner size={36} /><div className="font-semibold mt-3 text-sm text-[var(--text)]">Searching similarity index...</div><div className="text-xs text-[var(--text-3)] mt-1">Comparing perceptual Hamming distances on the server.</div></div>
+                      <div className="flex flex-col items-center py-4">
+                        <div className="relative w-16 h-16 flex items-center justify-center mb-3">
+                          <div className="loading-orb-outer absolute inset-0 rounded-full" style={{ border: '2.5px solid var(--border)', borderTopColor: '#12AAFF', borderRightColor: '#12AAFF' }} />
+                          <div className="loading-orb-inner absolute inset-1.5 rounded-full" style={{ border: '2.5px solid var(--border)', borderBottomColor: '#00D395', borderLeftColor: '#00D395' }} />
+                          <ArbitrumLogo size={20} animated />
+                        </div>
+                        <div className="font-semibold text-sm text-[var(--text)]">Searching similarity index...</div>
+                        <div className="text-xs text-[var(--text-3)] mt-1">Comparing perceptual Hamming distances on the server.</div>
+                      </div>
                     )}
                   </div>
                 ) : <SearchResults results={dbResults} loading={loading} uploadedFile={file} />}

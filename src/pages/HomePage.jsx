@@ -13,7 +13,7 @@ import { AuroraBackground } from '../components/aceternity/AuroraBackground'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { TextReveal } from '../components/aceternity/TextReveal'
 import { BeamLine } from '../components/aceternity/BeamLine'
-import { ArbitrumLogo, ArbitrumOrbit } from '../components/ArbitrumLogo'
+import { ArbitrumLogo, ArbitrumOrbit, AnimatedArbitrumBadge, AnimatedNetworkBadge } from '../components/ArbitrumLogo'
 import { FilePlus, Search, Shield, ArrowRight, Upload, FingerprintPattern as Fingerprint, Wallet, CircleCheck as CheckCircle2, Database, Layers, Sparkles, Zap, Eye, Link2, Cpu, Server, Pin, GitBranch } from 'lucide-react'
 import { SUPPORTED_FILES, CONTRACT_ADDRESS, ARBITRUM_SEPOLIA } from '../config'
 
@@ -46,15 +46,13 @@ export default function HomePage() {
           <ParticleField density={40} />
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
-              <Badge variant="arb">
-                <ArbitrumLogo size={12} />
-                <span className="ml-1">Powered by Arbitrum Stylus</span>
-              </Badge>
-              <Badge variant="success">
-                <span className="live-dot" />
-                <span className="ml-1">Arbitrum Sepolia Testnet</span>
-              </Badge>
+            <div className="flex items-center justify-center gap-3 flex-wrap mb-6">
+              <div className="badge-float">
+                <AnimatedArbitrumBadge text="Powered by Arbitrum Stylus" />
+              </div>
+              <div className="badge-float-delayed">
+                <AnimatedNetworkBadge text="Arbitrum Sepolia Testnet" />
+              </div>
             </div>
 
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-5 text-[var(--text)]">
@@ -101,7 +99,7 @@ export default function HomePage() {
       {/* ════ STATS ════ */}
       <section className="max-w-[1280px] mx-auto px-5 -mt-8 relative z-10">
         <SpotlightCard>
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden card-hover-glow">
             <div className="grid grid-cols-1 sm:grid-cols-3">
               <StatItem icon={<FilePlus size={20} />} color="#12AAFF" label="Registered Files" value={stats.loading ? '...' : stats.registered} suffix="live" />
               <StatItem icon={<Eye size={20} />} color="#00D395" label="Verifications" value={stats.loading ? '...' : stats.verifications} suffix="live" border />
@@ -119,7 +117,7 @@ export default function HomePage() {
           <p className="text-sm text-[var(--text-3)]">From file upload to blockchain anchor — the complete pipeline</p>
         </div>
 
-        <Card className="p-8 overflow-hidden relative">
+        <Card className="p-8 overflow-hidden relative card-hover-glow">
           <ParticleField density={20} color="#12AAFF" />
 
           {/* Workflow nodes */}
@@ -166,7 +164,7 @@ export default function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <SpotlightCard className="md:col-span-2">
-            <Card hover className="h-full p-6">
+            <Card hover className="h-full p-6 card-hover-glow">
               <div className="flex items-center gap-2 mb-3">
                 <span className="arb-badge text-xs font-bold px-2 py-0.5 rounded">SHA-256</span>
                 <span className="font-bold text-base text-[var(--text)]">Cryptographic Hash</span>
@@ -177,7 +175,7 @@ export default function HomePage() {
           </SpotlightCard>
 
           <SpotlightCard>
-            <Card hover className="h-full p-6">
+            <Card hover className="h-full p-6 card-hover-glow">
               <div className="flex items-center gap-2 mb-3">
                 <span className="bg-[var(--success-bg)] text-[#00D395] text-xs font-bold px-2 py-0.5 rounded border border-[var(--success-border)]">pHash</span>
                 <span className="font-bold text-base text-[var(--text)]">Perceptual</span>
@@ -187,7 +185,7 @@ export default function HomePage() {
           </SpotlightCard>
 
           <SpotlightCard>
-            <Card hover className="h-full p-6">
+            <Card hover className="h-full p-6 card-hover-glow">
               <div className="flex items-center gap-2 mb-3">
                 <span className="bg-[rgba(179,136,255,0.1)] text-[#B388FF] text-xs font-bold px-2 py-0.5 rounded border border-[rgba(179,136,255,0.25)]">SEM</span>
                 <span className="font-bold text-base text-[var(--text)]">Semantic</span>
@@ -197,7 +195,7 @@ export default function HomePage() {
           </SpotlightCard>
 
           <SpotlightCard>
-            <Card hover className="h-full p-6">
+            <Card hover className="h-full p-6 card-hover-glow">
               <div className="flex items-center gap-2 mb-3">
                 <span className="bg-[var(--success-bg)] text-[#00D395] text-xs font-bold px-2 py-0.5 rounded border border-[var(--success-border)]">FACE</span>
                 <span className="font-bold text-base text-[var(--text)]">ArcFace</span>
@@ -207,7 +205,7 @@ export default function HomePage() {
           </SpotlightCard>
 
           <SpotlightCard>
-            <Card hover className="h-full p-6">
+            <Card hover className="h-full p-6 card-hover-glow">
               <div className="flex items-center gap-2 mb-3">
                 <span className="bg-[rgba(255,155,0,0.08)] text-[#FF9B00] text-xs font-bold px-2 py-0.5 rounded border border-[rgba(255,155,0,0.25)]">AUD</span>
                 <span className="font-bold text-base text-[var(--text)]">wav2vec2</span>
@@ -220,7 +218,7 @@ export default function HomePage() {
 
       {/* ════ SUPPORTED FORMATS ════ */}
       <section className="max-w-[1280px] mx-auto px-5 pb-12">
-        <Card>
+        <Card className="card-hover-glow">
           <div className="px-5 py-4 border-b border-[var(--border)]">
             <h2 className="text-sm font-bold flex items-center gap-2 text-[var(--text)]"><Database size={16} className="text-[#12AAFF]" /> Supported File Formats</h2>
           </div>
@@ -266,7 +264,7 @@ function FeatureCard({ to, href, icon, color, title, description, cta, delay }) 
   const content = (
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4, delay }}>
       <SpotlightCard className="h-full">
-        <Card hover className="h-full cursor-pointer group">
+        <Card hover className="h-full cursor-pointer group card-hover-glow card-border-animate">
           <CardBody className="p-6">
             <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: `${color}15`, color }}>{icon}</div>
             <h3 className="text-base font-bold mb-2 text-[var(--text)]">{title}</h3>

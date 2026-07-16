@@ -173,7 +173,7 @@ export default function RegisterPage() {
         {/* LEFT */}
         <div className="flex flex-col gap-5">
           <SpotlightCard>
-            <Card>
+            <Card className="card-hover-glow">
               <CardHeader>
                 <CardTitle><Upload size={16} className="text-[#12AAFF]" /> File Upload</CardTitle>
               </CardHeader>
@@ -184,7 +184,7 @@ export default function RegisterPage() {
           <AnimatePresence>
             {(processing || hashes.sha256) && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-                <Card>
+                <Card className="card-hover-glow">
                   <CardHeader>
                     <CardTitle><Fingerprint size={16} className="text-[#12AAFF]" /> Content Fingerprints</CardTitle>
                     {processing && <Badge variant="arb">Computing...</Badge>}
@@ -241,7 +241,7 @@ export default function RegisterPage() {
         {/* RIGHT */}
         <div className="flex flex-col gap-5">
           <SpotlightCard>
-            <Card>
+            <Card className="card-hover-glow card-border-animate">
               <CardHeader>
                 <CardTitle><Shield size={16} className="text-[#12AAFF]" /> Blockchain Registration</CardTitle>
               </CardHeader>
@@ -265,8 +265,12 @@ export default function RegisterPage() {
                         </>
                       ) : (
                         <div className="text-center py-4">
-                          <Spinner size={40} />
-                          <div className="font-semibold mt-3 text-sm text-[var(--text)]">Extracting & Hashing...</div>
+                          <div className="relative w-16 h-16 flex items-center justify-center mb-3">
+                            <div className="loading-orb-outer absolute inset-0 rounded-full" style={{ border: '2.5px solid var(--border)', borderTopColor: '#12AAFF', borderRightColor: '#12AAFF' }} />
+                            <div className="loading-orb-inner absolute inset-1.5 rounded-full" style={{ border: '2.5px solid var(--border)', borderBottomColor: '#00D395', borderLeftColor: '#00D395' }} />
+                            <ArbitrumLogo size={20} animated />
+                          </div>
+                          <div className="font-semibold text-sm text-[var(--text)]">Extracting & Hashing...</div>
                           <div className="text-xs text-[var(--text-3)] mt-1">Generating signatures. This may take up to a minute for larger videos.</div>
                         </div>
                       )}
@@ -310,8 +314,12 @@ export default function RegisterPage() {
 
                   {step === 3 && signing && (
                     <motion.div key="signing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-8">
-                      <Spinner size={40} />
-                      <div className="font-semibold mt-3 text-sm text-[var(--text)]">Waiting for confirmation...</div>
+                      <div className="relative w-16 h-16 flex items-center justify-center mb-3">
+                        <div className="loading-orb-outer absolute inset-0 rounded-full" style={{ border: '2.5px solid var(--border)', borderTopColor: '#12AAFF', borderRightColor: '#12AAFF' }} />
+                        <div className="loading-orb-inner absolute inset-1.5 rounded-full" style={{ border: '2.5px solid var(--border)', borderBottomColor: '#00D395', borderLeftColor: '#00D395' }} />
+                        <ArbitrumLogo size={20} animated />
+                      </div>
+                      <div className="font-semibold text-sm text-[var(--text)]">Waiting for confirmation...</div>
                       <div className="text-xs text-[var(--text-3)] mt-1">Please confirm the transaction in your wallet</div>
                     </motion.div>
                   )}
@@ -346,7 +354,7 @@ export default function RegisterPage() {
             </Card>
           </SpotlightCard>
 
-          <Card>
+          <Card className="card-hover-glow">
             <CardHeader><CardTitle>What gets stored?</CardTitle></CardHeader>
             <CardBody className="text-xs leading-relaxed text-[var(--text-2)]">
               <div className="flex flex-col gap-3">

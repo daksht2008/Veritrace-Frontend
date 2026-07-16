@@ -118,7 +118,7 @@ export default function AboutPage() {
           {HASH_TYPES.map((h, i) => (
             <motion.div key={h.tag} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
               <SpotlightCard className="h-full">
-                <Card hover className="h-full">
+                <Card hover className="h-full card-hover-glow">
                   <CardBody className="p-5 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                       <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${h.color}15`, color: h.color }}>{h.tag}</span>
@@ -160,7 +160,7 @@ function StepCard({ num, title, desc, icon: Icon, color, delay }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay }}>
       <SpotlightCard>
-        <Card hover className="flex gap-3 items-start p-4">
+        <Card hover className="flex gap-3 items-start p-4 card-hover-glow">
           <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--bg-2)] flex items-center justify-center font-extrabold text-sm" style={{ color }}>{num}</div>
           <div className="flex-1">
             <div className="flex items-center gap-1.5 font-bold text-sm mb-1 text-[var(--text)]"><Icon size={14} style={{ color }} /> {title}</div>

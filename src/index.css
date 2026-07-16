@@ -63,18 +63,18 @@
 }
 
 [data-theme="dark"] {
-  --bg: #060608;
-  --bg-2: #0C0D12;
-  --bg-3: #111318;
-  --surface: #0F1015;
-  --surface-2: #151720;
-  --surface-3: #1A1D28;
-  --border: rgba(255,255,255,0.06);
-  --border-2: rgba(255,255,255,0.10);
-  --text: #F0F2F8;
-  --text-2: #B8BDD1;
-  --text-3: #7B82A0;
-  --text-4: #4A5170;
+  --bg: #050507;
+  --bg-2: #0A0B10;
+  --bg-3: #0F1117;
+  --surface: #0C0D13;
+  --surface-2: #131520;
+  --surface-3: #1A1E2C;
+  --border: rgba(255,255,255,0.07);
+  --border-2: rgba(255,255,255,0.12);
+  --text: #F5F7FC;
+  --text-2: #C5CBD9;
+  --text-3: #8A92AC;
+  --text-4: #525A78;
   --arb: #12AAFF;
   --arb-bg: rgba(18, 170, 255, 0.10);
   --arb-border: rgba(18, 170, 255, 0.25);
@@ -82,14 +82,14 @@
   --success-border: rgba(0, 211, 149, 0.25);
   --danger-bg: rgba(255, 77, 77, 0.10);
   --danger-border: rgba(255, 77, 77, 0.25);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,0.6);
-  --shadow-arb: 0 0 30px rgba(18, 170, 255, 0.25);
-  --shadow-arb-lg: 0 0 80px rgba(18, 170, 255, 0.12);
-  --navbar-bg: rgba(6, 6, 8, 0.75);
-  --card-gradient: linear-gradient(135deg, rgba(15,16,21,0.9), rgba(21,23,32,0.7));
-  --glow-arb: rgba(18, 170, 255, 0.12);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5), 0 0 1px rgba(18,170,255,0.04);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.6), 0 0 1px rgba(18,170,255,0.06);
+  --shadow-lg: 0 20px 56px rgba(0,0,0,0.7), 0 0 2px rgba(18,170,255,0.08);
+  --shadow-arb: 0 0 32px rgba(18, 170, 255, 0.28), 0 0 4px rgba(18,170,255,0.1);
+  --shadow-arb-lg: 0 0 100px rgba(18, 170, 255, 0.15);
+  --navbar-bg: rgba(5, 5, 7, 0.82);
+  --card-gradient: linear-gradient(135deg, rgba(12,13,19,0.95), rgba(19,21,32,0.85));
+  --glow-arb: rgba(18, 170, 255, 0.15);
 }
 
 /* ─── Base ─── */
@@ -455,3 +455,104 @@ body {
 
 /* ─── Prose ─── */
 .vt-prose p { margin: 0 0 0.75rem; color: var(--text-2); font-size: 0.9rem; line-height: 1.7; }
+
+/* ═══════════════════════════════════════
+   CARD HOVER BORDER-GLOW ANIMATIONS
+═══════════════════════════════════════ */
+
+/* Card hover lift + border glow */
+.card-hover-glow {
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+}
+.card-hover-glow:hover {
+  transform: translateY(-4px);
+  border-color: rgba(18,170,255,0.4) !important;
+  box-shadow: 0 0 0 1px rgba(18,170,255,0.15), 0 12px 40px rgba(18,170,255,0.12), var(--shadow-lg);
+}
+
+/* Animated gradient border on hover */
+.card-border-animate {
+  position: relative;
+  z-index: 0;
+}
+.card-border-animate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from 0deg, transparent 0deg, #12AAFF 60deg, #00D395 120deg, transparent 180deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+.card-border-animate:hover::before {
+  opacity: 1;
+  animation: spin-border 2.5s linear infinite;
+}
+
+/* Table row hover with gradient sweep */
+.vt-table tbody tr {
+  position: relative;
+  transition: background 0.2s ease;
+}
+.vt-table tbody tr::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #12AAFF, #00D395);
+  transform: scaleY(0);
+  transition: transform 0.2s ease;
+}
+.vt-table tbody tr:hover::before {
+  transform: scaleY(1);
+}
+
+/* Loading orb animation */
+@keyframes loading-orb {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.loading-orb-outer {
+  animation: loading-orb 1.5s linear infinite;
+}
+.loading-orb-inner {
+  animation: loading-orb 2s linear infinite reverse;
+}
+
+/* Badge float animation */
+@keyframes badge-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+.badge-float { animation: badge-float 3s ease-in-out infinite; }
+.badge-float-delayed { animation: badge-float 3s ease-in-out infinite 0.5s; }
+
+/* Badge shimmer sweep */
+@keyframes badge-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.badge-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: badge-shimmer 2s linear infinite;
+}
+
+/* Skeleton table row */
+@keyframes skeleton-row {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton-row {
+  background: linear-gradient(90deg, var(--bg-3) 25%, var(--surface-2) 50%, var(--bg-3) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-row 1.5s linear infinite;
+}

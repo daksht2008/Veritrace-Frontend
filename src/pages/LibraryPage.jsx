@@ -80,7 +80,7 @@ export default function LibraryPage() {
       {error && <div className="mb-5"><Alert variant="danger">{error}</Alert></div>}
 
       <SpotlightCard>
-        <Card>
+        <Card className="card-hover-glow card-border-animate">
           <CardHeader>
             <CardTitle>
               <span className="flex items-center gap-2"><LibraryIcon size={16} className="text-[#12AAFF]" /> Registered Assets ({registrations.length})</span>
@@ -89,10 +89,23 @@ export default function LibraryPage() {
           </CardHeader>
 
           {loading ? (
-            <div className="text-center py-12">
-              <Spinner size={40} />
-              <div className="font-semibold mt-3 text-sm text-[var(--text)]">Reading blockchain event log...</div>
-              <div className="text-xs text-[var(--text-3)] mt-1">Querying Arbitrum Sepolia contract filters</div>
+            <div className="flex flex-col items-center justify-center py-20">
+              {/* Dual-ring animated loader with Arbitrum logo */}
+              <div className="relative w-24 h-24 flex items-center justify-center mb-6">
+                <div className="loading-orb-outer absolute inset-0 rounded-full" style={{ border: '3px solid var(--border)', borderTopColor: '#12AAFF', borderRightColor: '#12AAFF' }} />
+                <div className="loading-orb-inner absolute inset-2 rounded-full" style={{ border: '3px solid var(--border)', borderBottomColor: '#00D395', borderLeftColor: '#00D395' }} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <ArbitrumLogo size={28} animated />
+                </div>
+              </div>
+              <div className="text-lg font-bold text-[var(--text)] mb-1.5">Reading blockchain event log...</div>
+              <div className="text-sm text-[var(--text-3)] mb-5">Querying Arbitrum Sepolia contract filters</div>
+              {/* Skeleton table rows */}
+              <div className="w-full max-w-3xl flex flex-col gap-2">
+                {[0,1,2,3,4].map(i => (
+                  <div key={i} className="skeleton-row h-12 rounded-lg" style={{ animationDelay: `${i * 0.15}s` }} />
+                ))}
+              </div>
             </div>
           ) : registrations.length === 0 ? (
             <EmptyState icon={<LibraryIcon size={28} />} title="No assets registered yet" description="Go to the Register tab to write the first cryptographic fingerprint to the contract!" />
