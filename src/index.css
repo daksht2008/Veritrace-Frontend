@@ -117,10 +117,18 @@ button { cursor: pointer; font-family: inherit; }
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
+.verify-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1.8fr;
+  gap: 1.5rem;
+}
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
+}
+@media (max-width: 992px) {
+  .verify-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
@@ -153,26 +161,38 @@ button { cursor: pointer; font-family: inherit; }
 .marquee-banner {
   background: linear-gradient(90deg, #0784c3, #1e2022, #0784c3);
   overflow: hidden;
-  white-space: nowrap;
   padding: 0.375rem 0;
   font-size: 0.75rem;
   font-weight: 600;
   color: rgba(255,255,255,0.9);
 }
 .marquee-track {
-  display: inline-block;
-  animation: marquee-scroll 22s linear infinite;
+  display: flex;
+  width: max-content;
+  gap: 2rem; /* Uniform gap between content groups */
+  animation: marquee-scroll 35s linear infinite;
 }
 .marquee-banner:hover .marquee-track { animation-play-state: paused; }
+.marquee-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem; /* Uniform gap between messages and separators */
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .marquee-content a {
   color: #6ee7b7;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 .marquee-content a:hover { color: #a7f3d0; }
+.marquee-separator {
+  color: #eab308;
+  font-size: 0.875rem;
+}
 @keyframes marquee-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-33.33%); }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(calc(-50% - 1rem), 0, 0); } /* Offset half the track minus half the gap */
 }
 
 /* ── Navbar ── */

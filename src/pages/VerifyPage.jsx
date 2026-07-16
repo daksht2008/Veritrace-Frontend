@@ -13,6 +13,7 @@
  * 
  * Deployed Contract: 0x468edc5b2fe9d1c919f2377cbe0ccb16f32ead29
  */
+import { useState } from 'react'
 import FileUpload from '../components/FileUpload'
 import HashDisplay from '../components/HashDisplay'
 import SearchResults from '../components/SearchResults'
@@ -40,6 +41,8 @@ export default function VerifyPage() {
     verBlockchainRecord: blockchainRecord, setVerBlockchainRecord: setBlockchainRecord,
     verDbResults: dbResults, setVerDbResults: setDbResults,
   } = useUpload()
+
+
 
   /**
    * computeLocalSHA256 — Uses the Web Crypto API to generate a SHA-256 hash.
@@ -69,7 +72,7 @@ export default function VerifyPage() {
         functionName: 'verifyContent',
         args: [bytes32Hash],
       })
-      
+
       return {
         isRegistered: true,
         creator: record[0],
@@ -147,7 +150,7 @@ export default function VerifyPage() {
         })
 
         xhr.addEventListener('error', () => reject(new Error('Verification upload failed due to network error')))
-        
+
         xhr.open('POST', `${HASH_ENGINE_API}/api/v1/hash`)
         xhr.send(formData)
       })
@@ -216,12 +219,12 @@ export default function VerifyPage() {
                   try {
                     const controller = new AbortController()
                     const timeoutId = setTimeout(() => controller.abort(), 3000) // 3 seconds timeout
-                    
+
                     const metaRes = await fetch(`https://gateway.pinata.cloud/ipfs/${registeredIpfs}`, {
                       signal: controller.signal
                     })
                     clearTimeout(timeoutId)
-                    
+
                     if (metaRes.ok) {
                       const metaData = await metaRes.json()
                       mediaS3Url = metaData.media_s3_url
@@ -279,7 +282,7 @@ export default function VerifyPage() {
           if (exactData.match_found && exactData.record) {
             // Only add if not already in matches list
             const alreadyMatched = matches.some(m => m.assetId.toLowerCase().includes(sha256Hex.slice(0, 8).toLowerCase()))
-            
+
             if (onChainData) {
               setBlockchainRecord(prev => ({
                 ...prev,
@@ -310,68 +313,63 @@ export default function VerifyPage() {
       }
 
       try {
-        // Query Core Backend Similarity Matches (Segmented check for Videos/Docs, Fuzzy check for Images)
-        const isVideoOrDoc = hashData.media_type === 'video' || hashData.media_type === 'document'
-        
-        if (isVideoOrDoc && hashData.keyframes && hashData.keyframes.length > 0) {
-          // Query Segment Match for multi-page documents or video segments
+        // Build the segments payload. For videos/docs, it's an array of keyframes. For images, it's a single keyframe.
+        let segmentsPayload = [];
+        if (hashData.keyframes && hashData.keyframes.length > 0) {
+          segmentsPayload = hashData.keyframes.map(k => ({
+            offset: Number(k.offset),
+            phash: Number(k.phash),
+            semantic_hash: k.semantic_hash || [],
+            face_hash: k.face_hash || [],
+          }));
+        } else if (hashData.phash) {
+          segmentsPayload = [{
+            offset: 0,
+            phash: Number(hashData.phash),
+            semantic_hash: hashData.semantic_hash || [],
+            face_hash: hashData.face_hash || [],
+          }];
+        }
+
+        if (segmentsPayload.length > 0) {
           const segmentRes = await fetch(`${CORE_BACKEND_API}/api/v1/verify/segments`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              sha256: sha256Bytes32,
+              sha256: '0x' + sha256Hex,
               media_type: hashData.media_type,
-              segments: hashData.keyframes.map(k => ({
-                offset: Number(k.offset),
-                phash: Number(k.phash)
-              })),
+              segments: segmentsPayload,
             }),
-          })
+          });
 
           if (segmentRes.ok) {
-            const segmentData = await segmentRes.json()
+            const segmentData = await segmentRes.json();
             if (segmentData.match_found && segmentData.record) {
-              const alreadyMatched = matches.some(m => m.assetId.toLowerCase().includes(segmentData.record.Sha256Hash?.slice(0, 8).toLowerCase()))
-              if (!alreadyMatched) {
-                matches.push({
-                  matchType: 'similar',
-                  similarity: segmentData.similarity || 90,
-                  assetId: segmentData.record.Sha256Hash?.slice(0, 16),
-                  sha256: segmentData.record.Sha256Hash,
-                  mediaType: hashData.media_type || 'unknown',
-                  registeredAt: new Date(segmentData.record.Timestamp * 1000).toLocaleString(),
-                  creator: segmentData.record.CreatorAddress,
-                  aiTool: segmentData.record.AiTool,
-                  ipfsCid: segmentData.record.IpfsCid,
-                  mediaS3Url: segmentData.record.MediaS3Url,
-                  mediaIpfsUrl: segmentData.record.MediaIpfsUrl,
-                })
-              }
-            }
-          }
-        } else if (hashData.phash) {
-          // Query Fuzzy Visual Search for single images
-          const fuzzyRes = await fetch(`${CORE_BACKEND_API}/api/v1/verify/fuzzy?phash=${hashData.phash}`)
-          if (fuzzyRes.ok) {
-            const fuzzyData = await fuzzyRes.json()
-            if (fuzzyData.match_found && fuzzyData.record) {
-              const alreadyMatched = matches.some(m => m.assetId.toLowerCase().includes(fuzzyData.record.Sha256Hash?.slice(0, 8).toLowerCase()))
-              if (!alreadyMatched) {
-                matches.push({
-                  matchType: 'similar',
-                  similarity: fuzzyData.similarity || 90,
-                  assetId: fuzzyData.record.Sha256Hash?.slice(0, 16),
-                  sha256: fuzzyData.record.Sha256Hash,
-                  mediaType: hashData.media_type || 'unknown',
-                  registeredAt: new Date(fuzzyData.record.Timestamp * 1000).toLocaleString(),
-                  creator: fuzzyData.record.CreatorAddress,
-                  aiTool: fuzzyData.record.AiTool,
-                  ipfsCid: fuzzyData.record.IpfsCid,
-                  mediaS3Url: fuzzyData.record.MediaS3Url,
-                  mediaIpfsUrl: fuzzyData.record.MediaIpfsUrl,
-                })
+              const existingIndex = matches.findIndex(m => m.assetId.toLowerCase().includes(segmentData.record.Sha256Hash?.slice(0, 8).toLowerCase()));
+              const newMatch = {
+                matchType: segmentData.is_deepfake ? 'deepfake' : 'similar',
+                isDeepfake: segmentData.is_deepfake,
+                similarity: segmentData.similarity || 90,
+                assetId: segmentData.record.Sha256Hash?.slice(0, 16),
+                sha256: segmentData.record.Sha256Hash,
+                mediaType: hashData.media_type || 'unknown',
+                registeredAt: new Date(segmentData.record.Timestamp * 1000).toLocaleString(),
+                creator: segmentData.record.CreatorAddress,
+                aiTool: segmentData.record.AiTool,
+                ipfsCid: segmentData.record.IpfsCid,
+                mediaS3Url: segmentData.record.MediaS3Url,
+                mediaIpfsUrl: segmentData.record.MediaIpfsUrl,
+              };
+
+              if (existingIndex >= 0) {
+                // Upgrade the match if the backend found a deepfake, or if it has more accurate similarity
+                if (segmentData.is_deepfake || matches[existingIndex].matchType !== 'exact') {
+                  matches[existingIndex] = { ...matches[existingIndex], ...newMatch };
+                }
+              } else {
+                matches.push(newMatch);
               }
             }
           }
@@ -380,12 +378,12 @@ export default function VerifyPage() {
         console.warn('Core Backend similarity search failed:', dbErr.message)
       }
       setDbResults(matches)
-      
+
       // Increment local verification stats
       try {
         const count = Number(localStorage.getItem('vt_verifs_count') || 0)
         localStorage.setItem('vt_verifs_count', count + 1)
-      } catch (e) {}
+      } catch (e) { }
     } catch (err) {
       console.error('Verification error:', err)
       setError(`Failed to perform verification check: ${err.message}`)
@@ -404,17 +402,17 @@ export default function VerifyPage() {
         </div>
       </div>
 
-      <div className="grid-2">
+      <div className="verify-grid">
         {/* ── LEFT COLUMN: File Upload + Hash Display ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          
+
           {/* File Upload Zone */}
           <div className="card">
             <div className="card-header">
               <h2 className="card-header-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '0.5rem' }}>
-                  <circle cx="11" cy="11" r="8"/>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
                 Upload File to Verify
               </h2>
@@ -489,7 +487,7 @@ export default function VerifyPage() {
 
         {/* ── RIGHT COLUMN: Verification Results ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          
+
           {/* On-Chain Provenance Record */}
           {(blockchainRecord || loading) && (
             <div className="card animate-slide-up" style={{ borderColor: blockchainRecord ? 'var(--color-success)' : 'var(--color-border)' }}>
@@ -612,6 +610,7 @@ export default function VerifyPage() {
               )}
             </div>
           </div>
+
 
           {/* Error Banner */}
           {error && (

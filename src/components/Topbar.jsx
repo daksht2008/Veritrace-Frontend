@@ -22,22 +22,30 @@ export default function Topbar() {
       </section>
 
       {/* ── Scrolling faucet banner ──
-          Uses 3 copies of the message for a seamless infinite loop.
-          CSS animation translates by -33.33% (1 copy width) to loop.
-          Hovering pauses the scroll so users can click the link. */}
+          Uses repeated blocks in a flex layout to ensure it's wider than any screen width,
+          enabling a 100% gapless continuous loop. Hovering pauses the scroll. */}
       <div className="marquee-banner">
         <div className="marquee-track">
-          <span className="marquee-content">
-            🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;
-            <a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a>
-            &nbsp;&nbsp;&nbsp;⚡&nbsp;&nbsp;&nbsp;
-            🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;
-            <a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a>
-            &nbsp;&nbsp;&nbsp;⚡&nbsp;&nbsp;&nbsp;
-            🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;
-            <a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a>
-            &nbsp;&nbsp;&nbsp;⚡&nbsp;&nbsp;&nbsp;
-          </span>
+          <div className="marquee-content">
+            <span>🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;<a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a></span>
+            <span className="marquee-separator">⚡</span>
+            <span>🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;<a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a></span>
+            <span className="marquee-separator">⚡</span>
+            <span>🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;<a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a></span>
+            <span className="marquee-separator">⚡</span>
+            <span>🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;<a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a></span>
+            <span className="marquee-separator">⚡</span>
+          </div>
+          <div className="marquee-content">
+            <span>🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;<a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a></span>
+            <span className="marquee-separator">⚡</span>
+            <span>🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;<a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a></span>
+            <span className="marquee-separator">⚡</span>
+            <span>🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;<a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a></span>
+            <span className="marquee-separator">⚡</span>
+            <span>🚰 Need free testnet ETH? Get 0.01 Arbitrum Sepolia ETH from the&nbsp;<a href="https://faucet.lamprosdao.com/" target="_blank" rel="noopener noreferrer">Lampros DAO Faucet</a></span>
+            <span className="marquee-separator">⚡</span>
+          </div>
         </div>
       </div>
     </>
