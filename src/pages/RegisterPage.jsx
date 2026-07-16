@@ -161,6 +161,7 @@ export default function RegisterPage() {
         aiConfidenceScore: data.ai_confidence_score,
         semanticHash: data.semantic_hash || [],
         faceHashes: data.face_hashes || [],
+        audioHashes: data.audio_hashes || [],
         keyframes: data.keyframes || [],
       })
       setStep(2)
@@ -280,6 +281,7 @@ export default function RegisterPage() {
         media_type: hashes.mediaType || 'image',
         semantic_hash: hashes.semanticHash || [],
         face_hashes: hashes.faceHashes || [],
+        audio_hashes: hashes.audioHashes || [],
         keyframes: hashes.keyframes || [],
       }
 
@@ -495,7 +497,7 @@ export default function RegisterPage() {
                     )}
 
                     {/* Additional metadata from hash engine */}
-                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8125rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', fontSize: '0.8125rem' }}>
                       <div>
                         <span style={{ color: 'var(--color-text-muted)' }}>Asset ID: </span>
                         <span className="hash-tag">{hashes.assetId}</span>
@@ -510,17 +512,69 @@ export default function RegisterPage() {
                       </div>
                       {hashes.aiConfidenceScore !== undefined && hashes.aiConfidenceScore !== null && (
                         <div>
-                          <span style={{ color: 'var(--color-text-muted)' }}>AI Detection Score: </span>
-                          <span style={{ fontWeight: 600, color: maxConf > 0.75 ? 'var(--color-error)' : 'var(--color-success)' }}>
+                          <span style={{ color: 'var(--color-text-muted)' }}>AI Score: </span>
+                          <span style={{ fontWeight: 700, color: maxConf > 0.75 ? '#ef4444' : maxConf > 0.3 ? '#f59e0b' : '#22c55e' }}>
                             {Math.round(maxConf * 100)}%
                           </span>
                         </div>
                       )}
                     </div>
 
-                    {/* Collapsible Keyframes Signatures List */}
+                    {/* ── Semantic Hash Vector ── */}
+                    {hashes.semanticHash && hashes.semanticHash.length > 0 && (
+                      <div style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 0.75rem', border: '1px solid var(--color-border)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', borderRadius: '4px', padding: '0.1rem 0.35rem', fontWeight: 700, fontSize: '0.7rem' }}>SEM</span>
+                            <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>Semantic Embedding Vector</span>
+                          </div>
+                          <span className="badge badge-info" style={{ fontSize: '0.6875rem' }}>{hashes.semanticHash.length}-dim</span>
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
+                          [{hashes.semanticHash.slice(0, 6).map(v => v.toFixed(4)).join(', ')}{hashes.semanticHash.length > 6 ? ', …' : ''}]
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Face Hash Embeddings ── */}
+                    {hashes.faceHashes && hashes.faceHashes.length > 0 && (
+                      <div style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 0.75rem', border: '1px solid var(--color-border)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ background: 'linear-gradient(135deg, #059669, #0d9488)', color: 'white', borderRadius: '4px', padding: '0.1rem 0.35rem', fontWeight: 700, fontSize: '0.7rem' }}>FACE</span>
+                            <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>ArcFace Biometric Embeddings</span>
+                          </div>
+                          <span className="badge badge-success" style={{ fontSize: '0.6875rem' }}>{hashes.faceHashes.length} face{hashes.faceHashes.length > 1 ? 's' : ''} detected</span>
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
+                          {hashes.faceHashes.map((fh, i) => (
+                            <div key={i}>Face {i + 1}: [{fh.slice(0, 4).map(v => v.toFixed(4)).join(', ')}, …] ({fh.length}-dim)</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Audio Hash Embeddings ── */}
+                    {hashes.audioHashes && hashes.audioHashes.length > 0 && (
+                      <div style={{ background: 'var(--color-bg)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 0.75rem', border: '1px solid var(--color-border)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ background: 'linear-gradient(135deg, #dc2626, #ea580c)', color: 'white', borderRadius: '4px', padding: '0.1rem 0.35rem', fontWeight: 700, fontSize: '0.7rem' }}>AUD</span>
+                            <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>wav2vec2 Voice Biometric</span>
+                          </div>
+                          <span className="badge" style={{ fontSize: '0.6875rem', background: 'rgba(234,88,12,0.15)', color: '#ea580c', border: '1px solid rgba(234,88,12,0.3)' }}>{hashes.audioHashes[0]?.length || 768}-dim vector</span>
+                        </div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', marginTop: '0.25rem', fontFamily: 'var(--font-mono)' }}>
+                          {hashes.audioHashes.map((ah, i) => (
+                            <div key={i}>Track {i + 1}: [{ah.slice(0, 4).map(v => v.toFixed(4)).join(', ')}, …] ({ah.length}-dim)</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* ── Collapsible Keyframes Signatures List ── */}
                     {hashes.keyframes && hashes.keyframes.length > 0 && (
-                      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>
+                      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem', marginTop: '0.25rem' }}>
                         <div style={{ fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '0.375rem', fontSize: '0.8125rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span>Extracted Video Keyframes ({hashes.keyframes.length})</span>
                           <button 
@@ -533,7 +587,7 @@ export default function RegisterPage() {
                           </button>
                         </div>
                         <div style={{ 
-                          maxHeight: showAllKeyframes ? '180px' : '65px', 
+                          maxHeight: showAllKeyframes ? '220px' : '65px', 
                           overflowY: 'auto', 
                           background: 'var(--color-bg)', 
                           padding: '0.5rem', 
@@ -544,12 +598,20 @@ export default function RegisterPage() {
                           gap: '0.25rem',
                           fontFamily: 'var(--font-mono)',
                           fontSize: '0.725rem',
-                          transition: 'max-height 0.2s ease-in-out'
+                          transition: 'max-height 0.25s ease-in-out'
                         }}>
                           {(showAllKeyframes ? hashes.keyframes : hashes.keyframes.slice(0, 2)).map((kf, i) => (
-                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text)' }}>
-                              <span>⏱️ Offset: {kf.offset}ms</span>
-                              <span style={{ color: 'var(--color-accent)' }}>🔑 pHash: {kf.phash}</span>
+                            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', paddingBottom: '0.25rem', borderBottom: '1px solid var(--color-border)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text)' }}>
+                                <span>⏱️ Offset: {kf.offset}ms</span>
+                                <span style={{ color: 'var(--color-accent)' }}>🔑 pHash: {kf.phash}</span>
+                              </div>
+                              {kf.semantic_hash && kf.semantic_hash.length > 0 && (
+                                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.675rem' }}>🧠 sem: [{kf.semantic_hash.slice(0,3).map(v=>v.toFixed(3)).join(', ')}, …]</span>
+                              )}
+                              {kf.face_hashes && kf.face_hashes.length > 0 && (
+                                <span style={{ color: '#059669', fontSize: '0.675rem' }}>👤 {kf.face_hashes.length} face embedding{kf.face_hashes.length > 1 ? 's' : ''}</span>
+                              )}
                             </div>
                           ))}
                         </div>

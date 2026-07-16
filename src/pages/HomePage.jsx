@@ -72,7 +72,7 @@ export default function HomePage() {
        * SECTION 1: Hero — gradient background with search panel
        * ════════════════════════════════════════════════════════════ */}
       <section className="hero" style={{ position: 'relative', overflow: 'hidden' }}>
-        {/* Floating background decorative logos (Layer 1.5) */}
+        {/* Floating background decorative logos (Layer 1.5) — 12 drifting logos */}
         <div className="floating-logo float-1" aria-hidden="true"><LogoIcon size={80} /></div>
         <div className="floating-logo float-2" aria-hidden="true"><LogoIcon size={60} /></div>
         <div className="floating-logo float-3" aria-hidden="true"><LogoIcon size={110} /></div>
@@ -81,6 +81,10 @@ export default function HomePage() {
         <div className="floating-logo float-6" aria-hidden="true"><LogoIcon size={70} /></div>
         <div className="floating-logo float-7" aria-hidden="true"><LogoIcon size={120} /></div>
         <div className="floating-logo float-8" aria-hidden="true"><LogoIcon size={65} /></div>
+        <div className="floating-logo float-9" aria-hidden="true"><LogoIcon size={85} /></div>
+        <div className="floating-logo float-10" aria-hidden="true"><LogoIcon size={55} /></div>
+        <div className="floating-logo float-11" aria-hidden="true"><LogoIcon size={100} /></div>
+        <div className="floating-logo float-12" aria-hidden="true"><LogoIcon size={45} /></div>
         <div className="container">
           <div className="hero-content">
             <h1>Verify Content Authenticity on the Blockchain</h1>
