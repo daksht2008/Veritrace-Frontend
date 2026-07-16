@@ -402,7 +402,7 @@ export default function VerifyPage() {
         </div>
       </div>
 
-      <div className="grid-2">
+      <div className="verify-grid">
         {/* ── LEFT COLUMN: File Upload + Hash Display ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 

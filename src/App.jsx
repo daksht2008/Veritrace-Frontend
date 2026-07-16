@@ -4,7 +4,7 @@
  * Renders the persistent layout (Topbar, Navbar, Footer) and
  * switches page content via react-router-dom Routes.
  */
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Topbar from './components/Topbar'
 import Footer from './components/Footer'
@@ -29,6 +29,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify" element={<VerifyPage />} />
           <Route path="/library" element={<LibraryPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 

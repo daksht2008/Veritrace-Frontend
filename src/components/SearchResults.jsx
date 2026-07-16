@@ -312,7 +312,7 @@ export default function SearchResults({ results, loading, uploadedFile }) {
         }}>
           <div className="modal-card card animate-scale-in" onClick={(e) => e.stopPropagation()} style={{
             width: '100%',
-            maxWidth: (resolvedOriginalUrl && resolvedMediaType === 'image') ? '1200px' : '900px',
+            maxWidth: (resolvedOriginalUrl && resolvedMediaType === 'image') ? '1350px' : '900px',
             background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-lg)',
@@ -368,7 +368,7 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
-                    height: '400px'
+                    height: (resolvedOriginalUrl && resolvedMediaType === 'image') ? '300px' : '400px'
                   }}>
                     {uploadedFile && uploadedFile.type?.startsWith('video/') ? (
                       <video
@@ -405,7 +405,7 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                       alignItems: 'center',
                       justifyContent: 'center',
                       position: 'relative',
-                      height: '400px'
+                      height: (resolvedOriginalUrl && resolvedMediaType === 'image') ? '300px' : '400px'
                     }}
                     onContextMenu={(e) => e.preventDefault()}
                   >
@@ -494,7 +494,7 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                       alignItems: 'center',
                       justifyContent: 'center',
                       position: 'relative',
-                      height: '400px'
+                      height: (resolvedOriginalUrl && resolvedMediaType === 'image') ? '300px' : '400px'
                     }}>
                       {heatmapLoading ? (
                         <div style={{ textAlign: 'center', padding: '1rem' }}>
@@ -567,18 +567,74 @@ function MatchCard({ result, localPreviewUrl, onSelect }) {
   const isDeepfake = result.matchType === 'deepfake' || result.isDeepfake
   const percentage = result.similarity || 0
 
+  // Resolve standard gateway URL for S3/IPFS
+  const getGatewayUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('ipfs://')) {
+      return `https://gateway.pinata.cloud/ipfs/${url.slice(7)}`;
+    }
+    return url;
+  };
+
+  const isLegacy = !result.ipfsCid || result.ipfsCid === '' || result.ipfsCid.startsWith('QmYourMetadataCid');
+  const previewUrl = getGatewayUrl(result.mediaS3Url) || getGatewayUrl(result.mediaIpfsUrl);
+
   return (
-    <div className="match-card animate-fade-in" onClick={onSelect} style={{ cursor: 'pointer' }}>
+    <div className="match-card animate-fade-in" onClick={onSelect} style={{ cursor: 'pointer', display: 'flex', alignItems: 'stretch' }}>
       {/* ── Left color indicator ── */}
       <div className={`match-card-indicator ${isExact ? 'exact' : isDeepfake ? 'error' : 'similar'}`} style={isDeepfake ? { backgroundColor: 'var(--color-error)' } : {}} />
 
-      {/* ── Card body with match details ── */}
-      <div className="match-card-body">
+      {/* ── Thumbnail Section (Left) ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem 0 0.75rem 1rem', flexShrink: 0 }}>
+        {!previewUrl ? (
+          <div style={{
+            width: '140px',
+            height: '95px',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--color-border)',
+            background: 'var(--color-bg)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.6875rem',
+            color: 'var(--color-text-muted)',
+            textAlign: 'center',
+            padding: '0.5rem',
+            lineHeight: '1.3'
+          }}>
+            {isLegacy ? 'No preview available (Legacy register)' : 'Click here to see side by side comparison'}
+          </div>
+        ) : (
+          <img
+            src={previewUrl}
+            alt="Matched Asset Preview"
+            style={{
+              width: '140px',
+              height: '95px',
+              objectFit: 'cover',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--color-border)',
+              background: 'var(--color-bg)',
+            }}
+            onError={(e) => {
+              // Fall back to backend upload folder if available
+              if (result.assetId && e.target.src !== `https://api.veritrace.dpkvtrading.online/uploads/${result.assetId}`) {
+                e.target.src = `https://api.veritrace.dpkvtrading.online/uploads/${result.assetId}`;
+              } else {
+                e.target.style.display = 'none';
+              }
+            }}
+          />
+        )}
+      </div>
+
+      {/* ── Card body with match details (Middle) ── */}
+      <div className="match-card-body" style={{ flex: 1, padding: '0.875rem 1rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.375rem', minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span className={`badge ${isExact ? 'badge-success' : isDeepfake ? 'badge-error' : 'badge-warning'}`} style={isDeepfake ? { backgroundColor: '#dc2626', color: '#fff' } : {}}>
             {isExact ? '✓ Exact Match' : isDeepfake ? '🚨 DEEPFAKE DETECTED' : '≈ Similar'}
           </span>
-          <span className="text-cap">
+          <span className="text-cap" style={{ fontSize: '0.6875rem', fontWeight: 600 }}>
             {result.mediaType || 'unknown'}
           </span>
         </div>
@@ -608,79 +664,18 @@ function MatchCard({ result, localPreviewUrl, onSelect }) {
 
         {/* Registration timestamp */}
         {result.registeredAt && (
-          <div className="file-info-meta" style={{ marginBottom: '0.5rem' }}>
+          <div className="file-info-meta" style={{ margin: 0 }}>
             Registered: {result.registeredAt}
           </div>
         )}
-
-        {/* ── Match Image Preview ── */}
-        {(() => {
-          // Resolve standard gateway URL for S3/IPFS
-          const getGatewayUrl = (url) => {
-            if (!url) return null;
-            if (url.startsWith('ipfs://')) {
-              return `https://gateway.pinata.cloud/ipfs/${url.slice(7)}`;
-            }
-            return url;
-          };
-
-          let previewUrl = getGatewayUrl(result.mediaS3Url) || getGatewayUrl(result.mediaIpfsUrl);
-
-          if (!previewUrl) {
-            return (
-              <div style={{ marginTop: '0.5rem' }}>
-                <div style={{
-                  width: '120px',
-                  height: '90px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  background: 'var(--color-bg)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '0.625rem',
-                  color: 'var(--color-text-muted)',
-                  textAlign: 'center',
-                  padding: '0.5rem',
-                  lineHeight: '1.2'
-                }}>
-                  No preview available (Legacy register)
-                </div>
-              </div>
-            );
-          }
-
-          return (
-            <div style={{ marginTop: '0.5rem' }}>
-              <img
-                src={previewUrl}
-                alt="Matched Asset Preview"
-                style={{
-                  width: '120px',
-                  height: '90px',
-                  objectFit: 'cover',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  background: 'var(--color-bg)',
-                }}
-                onError={(e) => {
-                  // Fall back to backend upload folder if available
-                  if (result.assetId && e.target.src !== `https://api.veritrace.dpkvtrading.online/uploads/${result.assetId}`) {
-                    e.target.src = `https://api.veritrace.dpkvtrading.online/uploads/${result.assetId}`;
-                  } else {
-                    e.target.style.display = 'none';
-                  }
-                }}
-              />
-            </div>
-          );
-        })()}
       </div>
 
-      {/* ── Similarity percentage circle ── */}
-      <div className="match-card-percentage">
+      {/* ── Similarity percentage circle (Right) ── */}
+      <div className="match-card-percentage" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1.25rem' }}>
         <div style={{ textAlign: 'center' }}>
           <div className="match-percentage-value" style={{
+            fontSize: '1.375rem',
+            fontWeight: 800,
             color: isExact
               ? 'var(--color-success)'
               : isDeepfake
@@ -691,7 +686,7 @@ function MatchCard({ result, localPreviewUrl, onSelect }) {
           }}>
             {percentage.toFixed(1)}%
           </div>
-          <div className="match-percentage-label">match</div>
+          <div className="match-percentage-label" style={{ fontSize: '0.625rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-muted)' }}>match</div>
         </div>
       </div>
     </div>
