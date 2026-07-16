@@ -313,12 +313,21 @@ export default function SearchResults({ results, loading, uploadedFile }) {
             flexDirection: 'column'
           }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 className="card-header-title" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                <span>🔍</span> Authenticity Check — {comparisonMatch.similarity?.toFixed(1)}% Match
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <button
+                  className="btn btn-sm btn-outline"
+                  onClick={() => { setComparisonMatch(null); setHeatmapBase64(null); }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.5rem' }}
+                >
+                  ← Back
+                </button>
+                <h2 className="card-header-title" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', margin: 0 }}>
+                  <span>🔍</span> Authenticity Check — {comparisonMatch.similarity?.toFixed(1)}% Match
+                </h2>
+              </div>
               <button
                 className="btn btn-sm btn-outline"
-                onClick={() => setComparisonMatch(null)}
+                onClick={() => { setComparisonMatch(null); setHeatmapBase64(null); }}
                 style={{ padding: '0.25rem 0.5rem' }}
               >
                 ✕ Close
