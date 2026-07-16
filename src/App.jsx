@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
-import Topbar from './components/Topbar'
 import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
@@ -11,7 +10,6 @@ import AboutPage from './pages/AboutPage'
 function App() {
   return (
     <>
-      <Topbar />
       <Navbar />
       <main className="min-h-[calc(100vh-200px)] pb-8">
         <Routes>

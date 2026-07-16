@@ -46,11 +46,16 @@ export default function HomePage() {
           <ParticleField density={40} />
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <Badge variant="arb" className="mb-6">
-              <ArbitrumLogo size={12} />
-              <span className="ml-1">Powered by Arbitrum Stylus</span>
-              <span className="ml-1.5 live-dot" />
-            </Badge>
+            <div className="flex items-center justify-center gap-2 flex-wrap mb-6">
+              <Badge variant="arb">
+                <ArbitrumLogo size={12} />
+                <span className="ml-1">Powered by Arbitrum Stylus</span>
+              </Badge>
+              <Badge variant="success">
+                <span className="live-dot" />
+                <span className="ml-1">Arbitrum Sepolia Testnet</span>
+              </Badge>
+            </div>
 
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-5 text-[var(--text)]">
               Prove what's <span className="gradient-arb">real.</span>
