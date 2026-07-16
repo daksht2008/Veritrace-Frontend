@@ -158,6 +158,7 @@ export default function SearchResults({ results, loading, uploadedFile }) {
 function MatchCard({ result, onSelect }) {
   const isExact = result.matchType === 'exact'
   const isDeepfake = result.matchType === 'deepfake' || result.isDeepfake
+  const isAudioDeepfake = result.isAudioDeepfake
   const percentage = result.similarity || 0
   const getGatewayUrl = (url) => url?.startsWith('ipfs://') ? `https://gateway.pinata.cloud/ipfs/${url.slice(7)}` : url
   const isLegacy = !result.ipfsCid || result.ipfsCid === '' || result.ipfsCid.startsWith('QmYourMetadataCid')
@@ -172,6 +173,7 @@ function MatchCard({ result, onSelect }) {
       <div className="flex-1 p-3.5 flex flex-col justify-center gap-1 min-w-0">
         <div className="flex items-center gap-2">
           <Badge variant={isExact ? 'success' : isDeepfake ? 'danger' : 'warning'}>{isExact ? <><CheckCircle2 size={10} /> Exact Match</> : isDeepfake ? 'DEEPFAKE DETECTED' : '≈ Similar'}</Badge>
+          {isAudioDeepfake && <Badge variant="danger" className="ml-1">AUDIO DEEPFAKE</Badge>}
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">{result.mediaType || 'unknown'}</span>
         </div>
         {result.assetId && <div className="text-xs"><span className="text-[var(--text-3)]">Asset: </span><span className="font-mono text-[#12AAFF]">{result.assetId}</span></div>}
