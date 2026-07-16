@@ -1,24 +1,18 @@
-import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react'
+import { TriangleAlert as AlertTriangle, CircleCheck as CheckCircle2, Info, Circle as XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const icons = {
-  info: Info,
-  success: CheckCircle2,
-  warning: AlertTriangle,
-  danger: XCircle,
-}
-
+const icons = { info: Info, success: CheckCircle2, warning: AlertTriangle, danger: XCircle }
 const styles = {
-  info: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-  success: 'bg-emerald-400/10 text-emerald-400 border-emerald-400/20',
-  warning: 'bg-amber-400/10 text-amber-400 border-amber-400/20',
-  danger: 'bg-red-500/10 text-red-400 border-red-500/20',
+  info: 'bg-[var(--arb-bg)] text-[#12AAFF] border-[var(--arb-border)]',
+  success: 'bg-[var(--success-bg)] text-[#00D395] border-[var(--success-border)]',
+  warning: 'bg-[rgba(255,155,0,0.08)] text-[#FF9B00] border-[rgba(255,155,0,0.25)]',
+  danger: 'bg-[var(--danger-bg)] text-[#FF4D4D] border-[var(--danger-border)]',
 }
 
 export function Alert({ variant = 'info', children, className }) {
   const Icon = icons[variant] || Info
   return (
-    <div className={cn('flex gap-3 p-3.5 rounded-lg border text-sm leading-relaxed', styles[variant], className)}>
+    <div className={cn('flex gap-3 p-3.5 rounded-xl border text-sm leading-relaxed', styles[variant], className)}>
       <Icon size={18} className="flex-shrink-0 mt-0.5" />
       <div className="flex-1">{children}</div>
     </div>

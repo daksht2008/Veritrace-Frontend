@@ -6,25 +6,18 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-[var(--color-base-200)] text-[var(--color-text-secondary)] border border-[var(--color-border)]',
-        accent: 'bg-blue-500/10 text-blue-400 border border-blue-500/30',
-        success: 'bg-emerald-400/10 text-emerald-400 border border-emerald-400/30',
-        warning: 'bg-amber-400/10 text-amber-400 border border-amber-400/30',
-        danger: 'bg-red-500/10 text-red-400 border border-red-500/30',
-        info: 'bg-cyan-400/10 text-cyan-400 border border-cyan-400/30',
-        purple: 'bg-purple-400/10 text-purple-400 border border-purple-400/30',
+        default: 'bg-[var(--bg-2)] text-[var(--text-2)] border border-[var(--border)]',
+        arb: 'bg-[var(--arb-bg)] text-[#12AAFF] border border-[var(--arb-border)]',
+        success: 'bg-[var(--success-bg)] text-[#00D395] border border-[var(--success-border)]',
+        warning: 'bg-[rgba(255,155,0,0.1)] text-[#FF9B00] border border-[rgba(255,155,0,0.25)]',
+        danger: 'bg-[var(--danger-bg)] text-[#FF4D4D] border border-[var(--danger-border)]',
+        info: 'bg-[rgba(18,170,255,0.08)] text-[#12AAFF] border border-[var(--arb-border)]',
       },
     },
-    defaultVariants: {
-      variant: 'default',
-    },
+    defaultVariants: { variant: 'default' },
   }
 )
 
 export function Badge({ className, variant, children, ...props }) {
-  return (
-    <span className={cn(badgeVariants({ variant }), className)} {...props}>
-      {children}
-    </span>
-  )
+  return <span className={cn(badgeVariants({ variant }), className)} {...props}>{children}</span>
 }

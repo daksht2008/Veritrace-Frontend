@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function CopyButton({ text, className, size = 16 }) {
+export function CopyButton({ text, className, size = 14 }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -11,25 +11,19 @@ export function CopyButton({ text, className, size = 16 }) {
       await navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
+    } catch {}
   }
 
   return (
     <button
       onClick={handleCopy}
       className={cn(
-        'flex-shrink-0 w-7 h-7 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] flex items-center justify-center text-[var(--color-text-muted)] transition-all hover:border-blue-500/50 hover:text-blue-400',
+        'flex-shrink-0 w-7 h-7 rounded-lg border border-[var(--border)] bg-[var(--bg-2)] flex items-center justify-center text-[var(--text-3)] transition-all hover:border-[#12AAFF] hover:text-[#12AAFF]',
         className
       )}
       title="Copy to clipboard"
     >
-      {copied ? (
-        <Check size={size} className="text-emerald-400" />
-      ) : (
-        <Copy size={size} />
-      )}
+      {copied ? <Check size={size} className="text-[#00D395]" /> : <Copy size={size} />}
     </button>
   )
 }

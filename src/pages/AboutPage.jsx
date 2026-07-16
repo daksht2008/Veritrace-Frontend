@@ -1,36 +1,37 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LogoIcon } from '../components/Navbar'
+import { VeriTraceLogo, ArbitrumLogo, ArbitrumOrbit } from '../components/ArbitrumLogo'
 import { Button } from '../components/ui/button'
 import { Card, CardBody } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
-import {
-  FilePlus, Search, Fingerprint, Shield, Database, Server, Cpu, Bot,
-  ArrowRight, ChevronDown, Upload, Pin, Check, Layers, Zap, Eye, AlertTriangle
-} from 'lucide-react'
+import { AuroraBackground } from '../components/aceternity/AuroraBackground'
+import { ParticleField } from '../components/aceternity/ParticleField'
+import { SpotlightCard } from '../components/aceternity/SpotlightCard'
+import { BeamLine } from '../components/aceternity/BeamLine'
+import { FilePlus, Search, FingerprintPattern as Fingerprint, Shield, Database, Server, Cpu, Bot, ArrowRight, ChevronDown, Upload, Pin, Check, Layers, Zap, Eye, TriangleAlert as AlertTriangle } from 'lucide-react'
 
 const REGISTER_STEPS = [
-  { num: '01', title: 'Upload Your File', desc: 'Drag and drop or select any image, video, or document on the Register page. The file is sent to the Hash Engine API.', icon: Upload, color: 'text-blue-400' },
-  { num: '02', title: 'Fingerprint Extraction', desc: 'The Hash Engine computes a SHA-256 cryptographic hash, a 64-bit perceptual hash (pHash), semantic embeddings, ArcFace biometrics, and wav2vec2 audio vectors.', icon: Fingerprint, color: 'text-cyan-400' },
-  { num: '03', title: 'Pin to IPFS & S3', desc: 'Your media file is pinned to IPFS via Pinata and backed up to S3. A metadata JSON containing all fingerprints is also pinned, giving you a permanent ipfsCid.', icon: Pin, color: 'text-purple-400' },
-  { num: '04', title: 'Sign Blockchain Transaction', desc: 'Connect MetaMask on Arbitrum Sepolia and call registerContent(sha256, phash, ipfsCid, aiTool) on the VeriTrace Registry smart contract.', icon: Shield, color: 'text-emerald-400' },
-  { num: '05', title: 'Indexed & Protected', desc: "The Go backend's EVM listener picks up the ContentRegistered event and indexes your asset in PostgreSQL, Redis, and Qdrant — ready for instant verification.", icon: Database, color: 'text-amber-400' },
+  { num: '01', title: 'Upload Your File', desc: 'Drag and drop or select any image, video, or document on the Register page. The file is sent to the Hash Engine API.', icon: Upload, color: '#12AAFF' },
+  { num: '02', title: 'Fingerprint Extraction', desc: 'The Hash Engine computes a SHA-256 cryptographic hash, a 64-bit perceptual hash (pHash), semantic embeddings, ArcFace biometrics, and wav2vec2 audio vectors.', icon: Fingerprint, color: '#4DC3FF' },
+  { num: '03', title: 'Pin to IPFS & S3', desc: 'Your media file is pinned to IPFS via Pinata and backed up to S3. A metadata JSON containing all fingerprints is also pinned, giving you a permanent ipfsCid.', icon: Pin, color: '#1B4ADD' },
+  { num: '04', title: 'Sign Blockchain Transaction', desc: 'Connect MetaMask on Arbitrum Sepolia and call registerContent(sha256, phash, ipfsCid, aiTool) on the VeriTrace Registry smart contract.', icon: Shield, color: '#00D395' },
+  { num: '05', title: 'Indexed & Protected', desc: "The Go backend's EVM listener picks up the ContentRegistered event and indexes your asset in PostgreSQL, Redis, and Qdrant — ready for instant verification.", icon: Database, color: '#FF9B00' },
 ]
 
 const VERIFY_STEPS = [
-  { num: '01', title: 'Upload Suspect File', desc: "Go to the Verify page and drop in any file you want to check — whether it's an original, copy, or modified version.", icon: Upload, color: 'text-blue-400' },
-  { num: '02', title: 'Exact Match Check', desc: 'The SHA-256 hash is compared against the registry. A hit means a 100% exact match — the file is byte-for-byte identical to a registered original.', icon: Check, color: 'text-cyan-400' },
-  { num: '03', title: 'Fuzzy / Segment Match', desc: 'If exact match fails, pHash Hamming distance search runs via Qdrant KNN. For videos, every keyframe is individually compared using Manhattan (L1) distance.', icon: Search, color: 'text-purple-400' },
-  { num: '04', title: 'Deepfake Detection', desc: 'Face embeddings (ArcFace) and audio vectors (wav2vec2) are matched even when visual similarity is low — catching AI-generated deepfakes and voice clones.', icon: AlertTriangle, color: 'text-red-400' },
-  { num: '05', title: 'Result & Certificate', desc: 'View Exact Match, Derivative Match (with similarity %), or Unregistered. Download a signed JSON verification certificate for legal proof.', icon: FilePlus, color: 'text-emerald-400' },
+  { num: '01', title: 'Upload Suspect File', desc: "Go to the Verify page and drop in any file you want to check — whether it's an original, copy, or modified version.", icon: Upload, color: '#12AAFF' },
+  { num: '02', title: 'Exact Match Check', desc: 'The SHA-256 hash is compared against the registry. A hit means a 100% exact match — the file is byte-for-byte identical to a registered original.', icon: Check, color: '#4DC3FF' },
+  { num: '03', title: 'Fuzzy / Segment Match', desc: 'If exact match fails, pHash Hamming distance search runs via Qdrant KNN. For videos, every keyframe is individually compared using Manhattan (L1) distance.', icon: Search, color: '#B388FF' },
+  { num: '04', title: 'Deepfake Detection', desc: 'Face embeddings (ArcFace) and audio vectors (wav2vec2) are matched even when visual similarity is low — catching AI-generated deepfakes and voice clones.', icon: AlertTriangle, color: '#FF4D4D' },
+  { num: '05', title: 'Result & Certificate', desc: 'View Exact Match, Derivative Match (with similarity %), or Unregistered. Download a signed JSON verification certificate for legal proof.', icon: FilePlus, color: '#00D395' },
 ]
 
 const HASH_TYPES = [
-  { tag: 'SHA-256', color: 'text-blue-400', bg: 'bg-blue-500/10', title: 'Cryptographic Hash', desc: 'A deterministic 256-bit fingerprint of the raw file bytes. Any single changed byte produces a completely different hash. Used for exact-match detection.', use: 'Exact match • Duplicate detection • Blockchain registration' },
-  { tag: 'pHash', color: 'text-cyan-400', bg: 'bg-cyan-400/10', title: 'Perceptual Hash', desc: 'A 64-bit integer derived from the visual structure of an image or video frame (DCT-based). Similar images produce hashes with low Hamming distance.', use: 'Fuzzy image matching • Video keyframe comparison • Compression-resistant' },
-  { tag: 'SEM', color: 'text-purple-400', bg: 'bg-purple-400/10', title: 'Semantic Embedding', desc: 'A high-dimensional float vector encoding the semantic meaning of visual content, generated by a vision transformer model. Resists cropping, color shifts, and style transfers.', use: 'Semantic similarity • Style-transfer detection • Cross-modal search' },
-  { tag: 'FACE', color: 'text-emerald-400', bg: 'bg-emerald-400/10', title: 'ArcFace Biometric', desc: 'A 512-dimensional face identity embedding produced by the ArcFace model. Matches faces across lighting, age, pose, and cosmetic changes.', use: 'Deepfake detection • Face swap detection • Identity verification' },
-  { tag: 'AUD', color: 'text-orange-400', bg: 'bg-orange-400/10', title: 'wav2vec2 Voice Print', desc: "A 768-dimensional biometric vector of vocal frequencies and speech patterns from Facebook's wav2vec2-base model. Unique to each speaker.", use: 'Audio deepfake detection • Voice clone detection • Speaker verification' },
+  { tag: 'SHA-256', color: '#12AAFF', title: 'Cryptographic Hash', desc: 'A deterministic 256-bit fingerprint of the raw file bytes. Any single changed byte produces a completely different hash. Used for exact-match detection.', use: 'Exact match • Duplicate detection • Blockchain registration' },
+  { tag: 'pHash', color: '#00D395', title: 'Perceptual Hash', desc: 'A 64-bit integer derived from the visual structure of an image or video frame (DCT-based). Similar images produce hashes with low Hamming distance.', use: 'Fuzzy image matching • Video keyframe comparison • Compression-resistant' },
+  { tag: 'SEM', color: '#B388FF', title: 'Semantic Embedding', desc: 'A high-dimensional float vector encoding the semantic meaning of visual content, generated by a vision transformer model. Resists cropping, color shifts, and style transfers.', use: 'Semantic similarity • Style-transfer detection • Cross-modal search' },
+  { tag: 'FACE', color: '#00D395', title: 'ArcFace Biometric', desc: 'A 512-dimensional face identity embedding produced by the ArcFace model. Matches faces across lighting, age, pose, and cosmetic changes.', use: 'Deepfake detection • Face swap detection • Identity verification' },
+  { tag: 'AUD', color: '#FF9B00', title: 'wav2vec2 Voice Print', desc: "A 768-dimensional biometric vector of vocal frequencies and speech patterns from Facebook's wav2vec2-base model. Unique to each speaker.", use: 'Audio deepfake detection • Voice clone detection • Speaker verification' },
 ]
 
 const FAQ = [
@@ -45,29 +46,17 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen">
       {/* HERO */}
-      <section className="relative overflow-hidden mesh-gradient py-20 text-center">
-        <div className="absolute inset-0 grid-pattern opacity-30" />
-        {[...Array(5)].map((_, i) => (
-          <motion.div key={i} className="absolute pointer-events-none opacity-[0.04]"
-            animate={{ y: [0, -20, 0], x: [0, 10, 0], rotate: [0, 180, 360] }}
-            transition={{ duration: 20 + i * 5, repeat: Infinity, ease: 'linear' }}
-            style={{ top: `${10 + i * 20}%`, left: `${15 + i * 15}%` }}
-          >
-            <LogoIcon size={50 + i * 20} />
-          </motion.div>
-        ))}
-        <div className="relative max-w-[1280px] mx-auto px-5">
+      <AuroraBackground className="py-20 text-center">
+        <div className="max-w-[1280px] mx-auto px-5">
+          <ParticleField density={30} />
           <div className="flex items-center justify-center gap-3 mb-5">
-            <LogoIcon size={44} />
-            <span className="font-extrabold text-lg uppercase tracking-widest gradient-text-accent">VeriTrace</span>
+            <VeriTraceLogo size={44} />
+            <span className="font-extrabold text-lg uppercase tracking-widest gradient-arb">VeriTrace</span>
           </div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-            className="text-4xl md:text-5xl font-extrabold leading-tight mb-4"
-          >
-            How VeriTrace <span className="gradient-text">Works</span>
+          <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-4xl md:text-5xl font-extrabold leading-tight mb-4 text-[var(--text)]">
+            How VeriTrace <span className="gradient-arb">Works</span>
           </motion.h1>
-          <p className="text-base text-[var(--color-text-secondary)] max-w-2xl mx-auto leading-relaxed mb-8">
+          <p className="text-base text-[var(--text-2)] max-w-2xl mx-auto leading-relaxed mb-8">
             Blockchain-backed content provenance using multi-modal fingerprinting — SHA-256, perceptual hashes, semantic vectors, ArcFace biometrics, and wav2vec2 voice prints.
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
@@ -75,31 +64,27 @@ export default function AboutPage() {
             <Link to="/verify"><Button variant="outline" size="lg"><Search size={18} /> Verify Content</Button></Link>
           </div>
         </div>
-      </section>
+      </AuroraBackground>
 
       {/* ARCHITECTURE */}
       <section className="max-w-[1280px] mx-auto px-5 py-16">
-        <h2 className="text-center text-3xl font-extrabold mb-2">System Architecture</h2>
-        <p className="text-center text-sm text-[var(--color-text-muted)] mb-10">Five layers working together to protect your content</p>
+        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">System Architecture</h2>
+        <p className="text-center text-sm text-[var(--text-3)] mb-10">Five layers working together to protect your content</p>
         <div className="flex items-stretch justify-center gap-0 flex-wrap overflow-x-auto">
           {[
-            { icon: Cpu, label: 'Hash Engine', sub: 'Port 8081', color: 'text-blue-400' },
-            { icon: Pin, label: 'IPFS + S3', sub: 'Pinata / MinIO', color: 'text-cyan-400' },
-            { icon: Shield, label: 'Arbitrum', sub: 'Smart Contract', color: 'text-purple-400' },
-            { icon: Server, label: 'Go Backend', sub: 'EVM Listener', color: 'text-emerald-400' },
-            { icon: Database, label: 'PG + Redis + Qdrant', sub: 'Storage Layer', color: 'text-amber-400' },
+            { icon: Cpu, label: 'Hash Engine', sub: 'Port 8081', color: '#12AAFF' },
+            { icon: Pin, label: 'IPFS + S3', sub: 'Pinata / MinIO', color: '#4DC3FF' },
+            { icon: Shield, label: 'Arbitrum', sub: 'Smart Contract', color: '#1B4ADD' },
+            { icon: Server, label: 'Go Backend', sub: 'EVM Listener', color: '#00D395' },
+            { icon: Database, label: 'PG + Redis + Qdrant', sub: 'Storage Layer', color: '#FF9B00' },
           ].map((node, i, arr) => (
             <div key={i} className="flex items-center">
-              <motion.div
-                initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-5 text-center min-w-[130px] hover:border-[var(--color-border-hover)] transition-colors"
-              >
-                <node.icon size={28} className={`mx-auto mb-1.5 ${node.color}`} />
-                <div className="font-bold text-sm text-[var(--color-text)]">{node.label}</div>
-                <div className="text-[11px] text-[var(--color-text-muted)]">{node.sub}</div>
+              <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 text-center min-w-[130px] hover:border-[var(--border-2)] transition-colors">
+                <node.icon size={28} className="mx-auto mb-1.5" style={{ color: node.color }} />
+                <div className="font-bold text-sm text-[var(--text)]">{node.label}</div>
+                <div className="text-[11px] text-[var(--text-3)]">{node.sub}</div>
               </motion.div>
-              {i < arr.length - 1 && <ArrowRight size={20} className="mx-1 text-[var(--color-text-faint)] flex-shrink-0" />}
+              {i < arr.length - 1 && <ArrowRight size={20} className="mx-1 text-[var(--text-4)] flex-shrink-0" />}
             </div>
           ))}
         </div>
@@ -110,42 +95,40 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <div className="flex items-center gap-2.5 mb-5">
-              <span className="bg-blue-500/10 text-blue-400 rounded-lg p-2"><FilePlus size={20} /></span>
-              <h2 className="text-2xl font-extrabold">How to Register</h2>
+              <span className="bg-[var(--arb-bg)] text-[#12AAFF] rounded-xl p-2"><FilePlus size={20} /></span>
+              <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Register</h2>
             </div>
-            <div className="flex flex-col gap-3">
-              {REGISTER_STEPS.map((s, i) => <StepCard key={s.num} {...s} delay={i * 0.05} />)}
-            </div>
+            <div className="flex flex-col gap-3">{REGISTER_STEPS.map((s, i) => <StepCard key={s.num} {...s} delay={i * 0.05} />)}</div>
           </div>
           <div>
             <div className="flex items-center gap-2.5 mb-5">
-              <span className="bg-cyan-400/10 text-cyan-400 rounded-lg p-2"><Search size={20} /></span>
-              <h2 className="text-2xl font-extrabold">How to Verify</h2>
+              <span className="bg-[var(--success-bg)] text-[#00D395] rounded-xl p-2"><Search size={20} /></span>
+              <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Verify</h2>
             </div>
-            <div className="flex flex-col gap-3">
-              {VERIFY_STEPS.map((s, i) => <StepCard key={s.num} {...s} delay={i * 0.05} />)}
-            </div>
+            <div className="flex flex-col gap-3">{VERIFY_STEPS.map((s, i) => <StepCard key={s.num} {...s} delay={i * 0.05} />)}</div>
           </div>
         </div>
       </section>
 
       {/* HASH TYPES */}
       <section className="max-w-[1280px] mx-auto px-5 pb-16">
-        <h2 className="text-center text-3xl font-extrabold mb-2">Fingerprint Types</h2>
-        <p className="text-center text-sm text-[var(--color-text-muted)] mb-10">Multi-modal hashing catches everything from exact copies to AI deepfakes</p>
+        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Fingerprint Types</h2>
+        <p className="text-center text-sm text-[var(--text-3)] mb-10">Multi-modal hashing catches everything from exact copies to AI deepfakes</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {HASH_TYPES.map((h, i) => (
             <motion.div key={h.tag} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
-              <Card hover className="h-full">
-                <CardBody className="p-5 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${h.bg} ${h.color}`}>{h.tag}</span>
-                    <span className="font-bold text-sm">{h.title}</span>
-                  </div>
-                  <p className="text-xs text-[var(--color-text-muted)] leading-relaxed m-0">{h.desc}</p>
-                  <div className={`text-[11px] rounded px-2 py-1 ${h.bg} ${h.color}`}>Use cases: {h.use}</div>
-                </CardBody>
-              </Card>
+              <SpotlightCard className="h-full">
+                <Card hover className="h-full">
+                  <CardBody className="p-5 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${h.color}15`, color: h.color }}>{h.tag}</span>
+                      <span className="font-bold text-sm text-[var(--text)]">{h.title}</span>
+                    </div>
+                    <p className="text-xs text-[var(--text-3)] leading-relaxed m-0">{h.desc}</p>
+                    <div className="text-[11px] rounded px-2 py-1" style={{ background: `${h.color}10`, color: h.color }}>Use cases: {h.use}</div>
+                  </CardBody>
+                </Card>
+              </SpotlightCard>
             </motion.div>
           ))}
         </div>
@@ -153,25 +136,22 @@ export default function AboutPage() {
 
       {/* FAQ */}
       <section className="max-w-[760px] mx-auto px-5 pb-16">
-        <h2 className="text-center text-3xl font-extrabold mb-2">Frequently Asked Questions</h2>
-        <p className="text-center text-sm text-[var(--color-text-muted)] mb-8">Everything you need to know about VeriTrace</p>
-        <div className="flex flex-col gap-3">
-          {FAQ.map((f, i) => <FaqItem key={i} {...f} />)}
-        </div>
+        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Frequently Asked Questions</h2>
+        <p className="text-center text-sm text-[var(--text-3)] mb-8">Everything you need to know about VeriTrace</p>
+        <div className="flex flex-col gap-3">{FAQ.map((f, i) => <FaqItem key={i} {...f} />)}</div>
       </section>
 
       {/* CTA */}
-      <section className="relative overflow-hidden mesh-gradient py-16 text-center">
-        <div className="absolute inset-0 grid-pattern opacity-30" />
-        <div className="relative max-w-[1280px] mx-auto px-5">
-          <h2 className="text-3xl font-extrabold mb-3">Ready to protect your content?</h2>
-          <p className="text-sm text-[var(--color-text-secondary)] mb-8">Join the VeriTrace registry and secure your creative work on the blockchain.</p>
+      <AuroraBackground className="py-16 text-center">
+        <div className="max-w-[1280px] mx-auto px-5">
+          <h2 className="text-3xl font-extrabold mb-3 text-[var(--text)]">Ready to protect your content?</h2>
+          <p className="text-sm text-[var(--text-2)] mb-8">Join the VeriTrace registry and secure your creative work on the blockchain.</p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Link to="/register"><Button variant="primary" size="lg"><FilePlus size={18} /> Get Started</Button></Link>
             <Link to="/verify"><Button variant="outline" size="lg"><Search size={18} /> Verify Content</Button></Link>
           </div>
         </div>
-      </section>
+      </AuroraBackground>
     </div>
   )
 }
@@ -179,31 +159,24 @@ export default function AboutPage() {
 function StepCard({ num, title, desc, icon: Icon, color, delay }) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay }}>
-      <Card hover className="flex gap-3 items-start p-4">
-        <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-[var(--color-base-100)] flex items-center justify-center font-extrabold text-sm ${color}`}>
-          {num}
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-1.5 font-bold text-sm mb-1">
-            <Icon size={14} className={color} /> {title}
+      <SpotlightCard>
+        <Card hover className="flex gap-3 items-start p-4">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--bg-2)] flex items-center justify-center font-extrabold text-sm" style={{ color }}>{num}</div>
+          <div className="flex-1">
+            <div className="flex items-center gap-1.5 font-bold text-sm mb-1 text-[var(--text)]"><Icon size={14} style={{ color }} /> {title}</div>
+            <div className="text-xs text-[var(--text-3)] leading-relaxed">{desc}</div>
           </div>
-          <div className="text-xs text-[var(--color-text-muted)] leading-relaxed">{desc}</div>
-        </div>
-      </Card>
+        </Card>
+      </SpotlightCard>
     </motion.div>
   )
 }
 
 function FaqItem({ q, a }) {
   return (
-    <details className="group bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl overflow-hidden hover:border-[var(--color-border-hover)] transition-colors">
-      <summary className="p-4 cursor-pointer font-semibold text-sm flex items-center justify-between list-none select-none">
-        {q}
-        <ChevronDown size={18} className="text-blue-400 flex-shrink-0 group-open:rotate-180 transition-transform" />
-      </summary>
-      <div className="px-4 pb-4 text-xs text-[var(--color-text-muted)] leading-relaxed border-t border-[var(--color-border)] pt-3">
-        {a}
-      </div>
+    <details className="group bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-[var(--border-2)] transition-colors">
+      <summary className="p-4 cursor-pointer font-semibold text-sm flex items-center justify-between list-none select-none text-[var(--text)]">{q}<ChevronDown size={18} className="text-[#12AAFF] flex-shrink-0 group-open:rotate-180 transition-transform" /></summary>
+      <div className="px-4 pb-4 text-xs text-[var(--text-3)] leading-relaxed border-t border-[var(--border)] pt-3">{a}</div>
     </details>
   )
 }
