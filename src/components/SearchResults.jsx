@@ -19,7 +19,7 @@
  *     registeredAt: string (ISO date),
  *   }
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ARBITRUM_SEPOLIA, CORE_BACKEND_API } from '../config'
 
 export default function SearchResults({ results, loading, uploadedFile }) {
@@ -146,7 +146,7 @@ export default function SearchResults({ results, loading, uploadedFile }) {
     }
   }, [comparisonMatch])
 
-  const handleViewAlterations = async () => {
+  const handleViewAlterations = useCallback(async () => {
     if (!uploadedFile || !resolvedOriginalUrl) return
     setHeatmapLoading(true)
     try {
@@ -176,7 +176,16 @@ export default function SearchResults({ results, loading, uploadedFile }) {
     } finally {
       setHeatmapLoading(false)
     }
-  }
+  }, [uploadedFile, resolvedOriginalUrl])
+
+  // Auto-generate heatmap on image preview
+  useEffect(() => {
+    if (resolvedOriginalUrl && uploadedFile && resolvedMediaType === 'image') {
+      handleViewAlterations()
+    } else {
+      setHeatmapBase64(null)
+    }
+  }, [resolvedOriginalUrl, uploadedFile, resolvedMediaType, handleViewAlterations])
 
   const handleArchiveLegacy = async () => {
     if (!uploadedFile || !comparisonMatch) return
@@ -294,23 +303,24 @@ export default function SearchResults({ results, loading, uploadedFile }) {
           inset: 0,
           background: 'rgba(0, 0, 0, 0.82)',
           display: 'flex',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'center',
           zIndex: 1000,
-          padding: '1.5rem',
+          padding: '2rem 1.5rem',
+          overflowY: 'auto',
           backdropFilter: 'blur(4px)'
         }}>
           <div className="modal-card card animate-scale-in" onClick={(e) => e.stopPropagation()} style={{
             width: '100%',
-            maxWidth: '1100px',
-            maxHeight: '92vh',
+            maxWidth: (resolvedOriginalUrl && resolvedMediaType === 'image') ? '1200px' : '900px',
             background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-lg)',
             boxShadow: 'var(--shadow-lg)',
             overflow: 'hidden',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            margin: '2rem 0'
           }}>
             <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -334,11 +344,11 @@ export default function SearchResults({ results, loading, uploadedFile }) {
               </button>
             </div>
 
-            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', overflowY: 'auto', flex: 1 }}>
+            <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {/* SIDE-BY-SIDE PANELS */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
+                gridTemplateColumns: (resolvedOriginalUrl && resolvedMediaType === 'image') ? '1fr 1fr 1fr' : '1fr 1fr',
                 gap: '1rem',
                 minHeight: '420px'
               }}>
@@ -466,6 +476,56 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                     )}
                   </div>
                 </div>
+
+                {/* THIRD COLUMN: PIXEL DIFF HEATMAP (Only for image matches) */}
+                {resolvedOriginalUrl && resolvedMediaType === 'image' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                    <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: 'var(--color-danger)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Pixel Diff Heatmap
+                    </div>
+                    <div style={{
+                      width: '100%',
+                      flex: 1,
+                      background: '#0d0d0d',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px dashed rgba(222, 68, 55, 0.4)',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative',
+                      height: '400px'
+                    }}>
+                      {heatmapLoading ? (
+                        <div style={{ textAlign: 'center', padding: '1rem' }}>
+                          <div className="spinner" style={{ borderTopColor: 'var(--color-danger)' }} />
+                          <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Analyzing pixel diffs...</div>
+                        </div>
+                      ) : heatmapBase64 ? (
+                        <img
+                          src={heatmapBase64}
+                          alt="Alteration Heatmap"
+                          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                        />
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '1.25rem', color: 'var(--color-text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                          <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>🔍</div>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>Heatmap Not Loaded</div>
+                          <div style={{ fontSize: '0.6875rem', marginTop: '0.25rem', lineHeight: '1.3', maxWidth: '200px' }}>
+                            Make sure the Hash Engine service is running.
+                          </div>
+                          <button
+                            onClick={handleViewAlterations}
+                            className="btn btn-sm btn-outline"
+                            style={{ marginTop: '0.75rem', fontSize: '0.75rem', padding: '0.375rem 0.75rem' }}
+                          >
+                            Retry Analysis
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Match Comparison Details */}
@@ -481,56 +541,15 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                   <div style={{ color: 'var(--color-text-muted)' }}>Registration Date: {comparisonMatch.registeredAt}</div>
                 </div>
               </div>
-
-              {/* Heatmap result display — shown after clicking the footer button */}
-              {heatmapBase64 && (
-                <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem' }}>
-                  <div style={{ fontWeight: 600, color: 'var(--color-error)', marginBottom: '0.5rem' }}>🚨 Visual Alteration Heatmap — Pixel Diff Result</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.75rem' }}>Red areas indicate pixels that were altered from the original registered asset.</div>
-                  <div className="animate-scale-in" style={{
-                    width: '100%',
-                    background: '#0d0d0d',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--color-border)',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '350px'
-                  }}>
-                    <img
-                      src={heatmapBase64}
-                      alt="Alteration Heatmap"
-                      style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
 
-            <div className="card-footer" style={{ background: 'var(--color-bg)', display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-              {/* Always-visible heatmap button pinned in footer */}
+            <div className="card-footer" style={{ background: 'var(--color-bg)', display: 'flex', justifyContent: 'center' }}>
               <button
-                onClick={handleViewAlterations}
-                disabled={heatmapLoading || !resolvedOriginalUrl}
-                className="btn btn-sm"
-                style={{
-                  background: resolvedOriginalUrl ? 'linear-gradient(135deg, #dc2626, #b91c1c)' : 'var(--color-border)',
-                  color: 'white',
-                  border: 'none',
-                  padding: '0.5rem 1rem',
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap',
-                  flex: '0 0 auto'
-                }}
-              >
-                {heatmapLoading ? '⏳ Analyzing...' : '🔍 Generate Diff Heatmap'}
-              </button>
-              <button
-                className="btn btn-sm btn-primary w-full"
+                className="btn btn-primary"
                 onClick={() => { setComparisonMatch(null); setHeatmapBase64(null); }}
+                style={{ minWidth: '200px' }}
               >
-                Acknowledge Match Details & Close
+                ← Back to Results
               </button>
             </div>
           </div>
