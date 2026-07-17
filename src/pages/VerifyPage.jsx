@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { readContract, getContractEvents } from '@wagmi/core'
 import { parseAbi } from 'viem'
@@ -7,6 +7,7 @@ import { HashDisplay } from '../components/ui/hash-display'
 import SearchResults from '../components/SearchResults'
 import { Card, CardHeader, CardTitle, CardBody } from '../components/ui/card'
 import { Badge } from '../components/ui/badge'
+import { Button } from '../components/ui/button'
 import { Alert } from '../components/ui/alert'
 import { Progress } from '../components/ui/progress'
 import { Spinner } from '../components/ui/spinner'
@@ -18,7 +19,7 @@ import { config } from '../wagmiConfig'
 import {
   HASH_ENGINE_API, CONTRACT_ADDRESS, CONTRACT_ABI, ARBITRUM_SEPOLIA, CORE_BACKEND_API,
 } from '../config'
-import { Search, Shield, Database, Info, CircleCheck as CheckCircle2 } from 'lucide-react'
+import { Search, Shield, Database, Info, CircleCheck as CheckCircle2, FileText, Type, ExternalLink } from 'lucide-react'
 
 export default function VerifyPage() {
   const {
@@ -31,6 +32,22 @@ export default function VerifyPage() {
     verBlockchainRecord: blockchainRecord, setVerBlockchainRecord: setBlockchainRecord,
     verDbResults: dbResults, setVerDbResults: setDbResults,
   } = useUpload()
+
+  const [inputType, setInputType] = useState('media')
+  const [textContent, setTextContent] = useState('')
+
+  // Dynamically create a file from text input
+  useEffect(() => {
+    if (inputType === 'text') {
+      if (textContent.trim()) {
+        const textBlob = new Blob([textContent], { type: 'text/plain' })
+        const newFile = new File([textBlob], 'article.txt', { type: 'text/plain' })
+        setFile(newFile)
+      } else {
+        setFile(null)
+      }
+    }
+  }, [textContent, inputType, setFile])
 
   const computeLocalSHA256 = async (f) => {
     const arrayBuffer = await f.arrayBuffer()
@@ -68,32 +85,7 @@ export default function VerifyPage() {
       if (hashData.phash) setPhash(hashData.phash)
 
       const matches = []
-      const getHammingDistance = (a, b) => { let xor = BigInt(a) ^ BigInt(b), dist = 0; while (xor > 0n) { if (xor & 1n) dist++; xor >>= 1n } return dist }
-      const getSimilarityScore = (dist) => 100 - (dist / 64) * 100
 
-      try {
-        const events = await getContractEvents(config, { address: CONTRACT_ADDRESS, abi: parseAbi(CONTRACT_ABI), eventName: 'ContentRegistered', fromBlock: 0n, toBlock: 'latest' })
-        if (hashData.phash) {
-          const uploadedPhash = BigInt(hashData.phash)
-          for (const event of events) {
-            const args = event.args || {}
-            const isExactSha = args.sha256hash?.toLowerCase() === ('0x' + sha256Hex).toLowerCase()
-            if (args.phash && args.phash !== 0n) {
-              const distance = getHammingDistance(uploadedPhash, args.phash)
-              const score = getSimilarityScore(distance)
-              if (score >= 80) {
-                let mediaS3Url, mediaIpfsUrl
-                if (args.ipfsCid) { try { const controller = new AbortController(); const timeoutId = setTimeout(() => controller.abort(), 3000); const metaRes = await fetch(`https://gateway.pinata.cloud/ipfs/${args.ipfsCid}`, { signal: controller.signal }); clearTimeout(timeoutId); if (metaRes.ok) { const metaData = await metaRes.json(); mediaS3Url = metaData.media_s3_url; mediaIpfsUrl = metaData.media_ipfs_url } } catch {} }
-                matches.push({ matchType: isExactSha ? 'exact' : 'similar', similarity: score, assetId: args.sha256hash?.slice(0, 16), sha256: args.sha256hash, mediaType: hashData.media_type || 'unknown', registeredAt: new Date(Number(args.timestamp || 0n) * 1000).toLocaleString(), creator: args.creator, aiTool: args.aitool || '', ipfsCid: args.ipfsCid || '', mediaS3Url, mediaIpfsUrl })
-              }
-            }
-          }
-        }
-      } catch (logErr) { console.error('On-chain fuzzy search failed:', logErr) }
-
-      if (onChainData && matches.filter(m => m.matchType === 'exact').length === 0) {
-        matches.push({ matchType: 'exact', similarity: 100, assetId: `onchain-${sha256Hex.slice(0, 8)}`, sha256: `0x${sha256Hex}`, mediaType: hashData.media_type || 'unknown', registeredAt: new Date(onChainData.timestamp * 1000).toLocaleString(), creator: onChainData.creator, aiTool: onChainData.aiTool, ipfsCid: onChainData.ipfsCid })
-      }
 
       try {
         const exactRes = await fetch(`${CORE_BACKEND_API}/api/v1/verify/exact?hash=0x${sha256Hex}`)
@@ -107,6 +99,10 @@ export default function VerifyPage() {
         }
       } catch (dbErr) { console.warn('Backend exact match failed:', dbErr.message) }
 
+      if (onChainData && matches.filter(m => m.matchType === 'exact').length === 0) {
+        matches.push({ matchType: 'exact', similarity: 100, assetId: `onchain-${sha256Hex.slice(0, 8)}`, sha256: `0x${sha256Hex}`, mediaType: hashData.media_type || 'unknown', registeredAt: new Date(onChainData.timestamp * 1000).toLocaleString(), creator: onChainData.creator, aiTool: onChainData.aiTool, ipfsCid: onChainData.ipfsCid })
+      }
+
       try {
         let segmentsPayload = []
         if (hashData.keyframes?.length > 0) segmentsPayload = hashData.keyframes.map(k => ({ offset: Number(k.offset), phash: Number(k.phash), semantic_hash: k.semantic_hash || [], face_hash: k.face_hash || [] }))
@@ -117,7 +113,7 @@ export default function VerifyPage() {
             const segmentData = await segmentRes.json()
             if (segmentData.match_found && segmentData.record) {
               const existingIndex = matches.findIndex(m => m.assetId?.toLowerCase().includes(segmentData.record.Sha256Hash?.slice(0, 8).toLowerCase()))
-              const newMatch = { matchType: segmentData.is_deepfake ? 'deepfake' : 'similar', isDeepfake: segmentData.is_deepfake, isAudioDeepfake: segmentData.is_audio_deepfake, similarity: segmentData.similarity || 90, assetId: segmentData.record.Sha256Hash?.slice(0, 16), sha256: segmentData.record.Sha256Hash, mediaType: hashData.media_type || 'unknown', registeredAt: new Date(segmentData.record.Timestamp * 1000).toLocaleString(), creator: segmentData.record.CreatorAddress, aiTool: segmentData.record.AiTool, ipfsCid: segmentData.record.IpfsCid, mediaS3Url: segmentData.record.MediaS3Url, mediaIpfsUrl: segmentData.record.MediaIpfsUrl }
+              const newMatch = { matchType: segmentData.is_deepfake ? 'deepfake' : 'similar', isDeepfake: segmentData.is_deepfake, isAudioDeepfake: segmentData.is_audio_deepfake, similarity: segmentData.similarity || 90, temporalIntegrity: segmentData.temporal_integrity, assetId: segmentData.record.Sha256Hash?.slice(0, 16), sha256: segmentData.record.Sha256Hash, mediaType: hashData.media_type || 'unknown', registeredAt: new Date(segmentData.record.Timestamp * 1000).toLocaleString(), creator: segmentData.record.CreatorAddress, aiTool: segmentData.record.AiTool, ipfsCid: segmentData.record.IpfsCid, mediaS3Url: segmentData.record.MediaS3Url, mediaIpfsUrl: segmentData.record.MediaIpfsUrl }
               if (existingIndex >= 0) { if (segmentData.is_deepfake || matches[existingIndex].matchType !== 'exact') matches[existingIndex] = { ...matches[existingIndex], ...newMatch } }
               else matches.push(newMatch)
             }
@@ -143,8 +139,26 @@ export default function VerifyPage() {
         <div className="flex flex-col gap-5">
           <SpotlightCard>
             <Card className="card-hover-glow">
-              <CardHeader><CardTitle><Search size={16} className="text-[#12AAFF]" /> Upload File to Verify</CardTitle></CardHeader>
-              <CardBody><FileUpload onFileSelected={handleFileSelected} label="Drop a file to check against the VeriTrace registry" /></CardBody>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                  <span className="flex items-center gap-2"><Search size={16} className="text-[#12AAFF]" /> Verify Content</span>
+                </CardTitle>
+              </CardHeader>
+              <CardBody className="flex flex-col gap-4">
+                <div className="flex bg-[var(--bg-2)] p-1 rounded-xl border border-[var(--border)]">
+                  <button onClick={() => { setInputType('media'); setFile(null); setLocalSha256(null); setPhash(null); setBlockchainRecord(null); setDbResults(null); setError(null) }} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-colors ${inputType === 'media' ? 'bg-[var(--surface)] text-[var(--text)] shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text-2)]'}`}><FileText size={16} /> Media File</button>
+                  <button onClick={() => { setInputType('text'); setFile(null); setLocalSha256(null); setPhash(null); setBlockchainRecord(null); setDbResults(null); setError(null) }} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-colors ${inputType === 'text' ? 'bg-[var(--surface)] text-[var(--text)] shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text-2)]'}`}><Type size={16} /> Text Article</button>
+                </div>
+                {inputType === 'media' ? (
+                  <FileUpload onFileSelected={handleFileSelected} label="Drop a file to check against the VeriTrace registry" />
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <textarea className="w-full h-32 p-3 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl text-sm focus:border-[#12AAFF] focus:outline-none resize-none" placeholder="Paste your article or text content here to check it against the registry..." value={textContent} onChange={(e) => setTextContent(e.target.value)} />
+                    <div className="text-[10px] text-[var(--text-3)] text-right">{textContent.length} characters</div>
+                    <Button onClick={() => handleFileSelected(file)} disabled={!textContent.trim()}>Check Registry</Button>
+                  </div>
+                )}
+              </CardBody>
             </Card>
           </SpotlightCard>
 
@@ -194,7 +208,7 @@ export default function VerifyPage() {
                         <DataRow label="Registrant Wallet"><a href={`${ARBITRUM_SEPOLIA.explorer}/address/${blockchainRecord.creator}`} target="_blank" rel="noopener noreferrer" className="font-mono font-semibold text-[#12AAFF] hover:opacity-80">{blockchainRecord.creator.slice(0, 10)}...{blockchainRecord.creator.slice(-6)}</a></DataRow>
                         <DataRow label="Proof Committed At" value={new Date(blockchainRecord.timestamp * 1000).toLocaleString()} />
                         <DataRow label="AI Tool Attribution" value={blockchainRecord.aiTool || 'None'} bold />
-                        {blockchainRecord.ipfsCid && <DataRow label="Metadata (IPFS)"><a href={`https://gateway.pinata.cloud/ipfs/${blockchainRecord.ipfsCid}`} target="_blank" rel="noopener noreferrer" className="text-[#12AAFF] hover:opacity-80">View CID ↗</a></DataRow>}
+                        {blockchainRecord.ipfsCid && <DataRow label="Metadata (IPFS)"><a href={`https://gateway.pinata.cloud/ipfs/${blockchainRecord.ipfsCid}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1 bg-[var(--surface-3)] hover:bg-[var(--border)] text-[var(--text-2)] rounded-md text-[11px] font-bold border border-[var(--border)] transition-colors"><ExternalLink size={12} /> View JSON</a></DataRow>}
                       </div>
                     )}
                   </CardBody>

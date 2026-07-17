@@ -14,7 +14,7 @@ import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { TextReveal } from '../components/aceternity/TextReveal'
 import { BeamLine } from '../components/aceternity/BeamLine'
 import { ArbitrumLogo, ArbitrumOrbit, AnimatedArbitrumBadge, AnimatedNetworkBadge } from '../components/ArbitrumLogo'
-import { FilePlus, Search, Shield, ArrowRight, Upload, FingerprintPattern as Fingerprint, Wallet, CircleCheck as CheckCircle2, Database, Layers, Sparkles, Zap, Eye, Link2, Cpu, Server, Pin, GitBranch } from 'lucide-react'
+import { FilePlus, Search, Shield, ArrowRight, Upload, FingerprintPattern as Fingerprint, Wallet, CircleCheck as CheckCircle2, Database, Layers, Sparkles, Zap, Eye, Link2, Cpu, Server, Pin, GitBranch, ChevronRight, ChevronLeft } from 'lucide-react'
 import { SUPPORTED_FILES, CONTRACT_ADDRESS, ARBITRUM_SEPOLIA } from '../config'
 
 export default function HomePage() {
@@ -42,7 +42,7 @@ export default function HomePage() {
     <>
       {/* ════ HERO ════ */}
       <AuroraBackground className="pt-12 pb-20">
-        <div className="max-w-[1280px] mx-auto px-5 text-center relative">
+        <div className="max-w-[1280px] mx-auto px-5 text-center relative z-10">
           <ParticleField density={40} />
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -133,9 +133,9 @@ export default function HomePage() {
 
           <div className="relative grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-0">
             <WorkflowNode icon={<Wallet size={24} />} label="Sign Tx" desc="MetaMask confirm" color="#00D395" step={4} />
-            <WorkflowConnector reverse />
+            <WorkflowConnector />
             <WorkflowNode icon={<Server size={24} />} label="Index" desc="Go backend" color="#00D395" step={5} />
-            <WorkflowConnector reverse />
+            <WorkflowConnector />
             <WorkflowNode icon={<CheckCircle2 size={24} />} label="Verified" desc="On-chain proof" color="#00D395" step={6} />
           </div>
 
@@ -307,15 +307,24 @@ function WorkflowNode({ icon, label, desc, color, step }) {
 
 function WorkflowConnector({ reverse }) {
   return (
-    <div className="hidden md:flex items-center justify-center">
-      <div className="w-full h-px relative overflow-hidden" style={{ background: 'var(--border)' }}>
+    <div className="hidden md:flex items-center justify-center w-full px-2">
+      <div className="w-full relative flex items-center">
+        {/* Dashed line background */}
+        <div className="w-full h-0 border-t-2 border-dashed border-[var(--border)]" />
+        
+        {/* Animated arrow container */}
         <motion.div
-          className="absolute top-0 h-full"
-          style={{ width: '40%', background: 'linear-gradient(90deg, transparent, #12AAFF, transparent)', boxShadow: '0 0 8px #12AAFF' }}
-          initial={reverse ? { left: '100%' } : { left: '-40%' }}
-          animate={reverse ? { left: '-40%' } : { left: '100%' }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-        />
+          className="absolute top-1/2 -translate-y-1/2 text-[#12AAFF]"
+          initial={reverse ? { left: '100%', opacity: 0 } : { left: '0%', opacity: 0 }}
+          animate={
+            reverse
+              ? { left: ['100%', '0%', '0%'], opacity: [0, 1, 0, 0] }
+              : { left: ['0%', '100%', '100%'], opacity: [0, 1, 0, 0] }
+          }
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        >
+          {reverse ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+        </motion.div>
       </div>
     </div>
   )

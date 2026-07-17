@@ -499,10 +499,12 @@ body {
 
 /* Table row hover with gradient sweep */
 .vt-table tbody tr {
-  position: relative;
   transition: background 0.2s ease;
 }
-.vt-table tbody tr::before {
+.vt-table tbody tr td:first-child {
+  position: relative;
+}
+.vt-table tbody tr td:first-child::before {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
@@ -511,7 +513,7 @@ body {
   transform: scaleY(0);
   transition: transform 0.2s ease;
 }
-.vt-table tbody tr:hover::before {
+.vt-table tbody tr:hover td:first-child::before {
   transform: scaleY(1);
 }
 
@@ -555,4 +557,30 @@ body {
   background: linear-gradient(90deg, var(--bg-3) 25%, var(--surface-2) 50%, var(--bg-3) 75%);
   background-size: 200% 100%;
   animation: skeleton-row 1.5s linear infinite;
+}
+
+/* Arbitrum Brand Kit Background */
+.arbitrum-brand-bg {
+  background: 
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 100px,
+      rgba(10, 20, 45, 0.4) 100px,
+      rgba(10, 20, 45, 0.4) 140px
+    ),
+    linear-gradient(135deg, #28A0F0 0%, #06112C 100%);
+  background-size: cover;
+  background-position: center;
+}
+.dark .arbitrum-brand-bg {
+  background: 
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 100px,
+      rgba(4, 9, 20, 0.8) 100px,
+      rgba(4, 9, 20, 0.8) 140px
+    ),
+    linear-gradient(135deg, #12AAFF 0%, #06112C 100%);
 }

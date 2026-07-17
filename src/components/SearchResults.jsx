@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CircleCheck as CheckCircle2, Search, TriangleAlert as AlertTriangle, Lock, Cloud } from 'lucide-react'
-import { ARBITRUM_SEPOLIA, CORE_BACKEND_API } from '../config'
+import { CircleCheck as CheckCircle2, Search, TriangleAlert as AlertTriangle, Lock, Cloud, ExternalLink } from 'lucide-react'
+import { ARBITRUM_SEPOLIA, CORE_BACKEND_API, HASH_ENGINE_API } from '../config'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Spinner } from './ui/spinner'
@@ -17,6 +17,8 @@ export default function SearchResults({ results, loading, uploadedFile }) {
   const [resolvedMediaType, setResolvedMediaType] = useState('image')
   const [loadingOriginal, setLoadingOriginal] = useState(false)
   const [uploadingLegacy, setUploadingLegacy] = useState(false)
+  const [syncLoading, setSyncLoading] = useState(false)
+  const [syncResult, setSyncResult] = useState(null)
 
   useEffect(() => {
     if (!uploadedFile || (!uploadedFile.type?.startsWith('image/') && !uploadedFile.type?.startsWith('video/'))) { setLocalPreviewUrl(null); return }
@@ -72,6 +74,24 @@ export default function SearchResults({ results, loading, uploadedFile }) {
     } catch {} finally { setUploadingLegacy(false) }
   }
 
+  const handleAnalyzeSync = async () => {
+    if (!uploadedFile) return
+    setSyncLoading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', uploadedFile)
+      const res = await fetch(`${HASH_ENGINE_API}/api/v1/analyze_sync`, { method: 'POST', body: fd })
+      if (res.ok) {
+        const data = await res.json()
+        setSyncResult(data)
+      }
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setSyncLoading(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex flex-col gap-2">
@@ -95,10 +115,10 @@ export default function SearchResults({ results, loading, uploadedFile }) {
         {results.map((result, index) => <MatchCard key={index} result={result} onSelect={() => setComparisonMatch(result)} />)}
       </div>
 
-      <Modal open={!!comparisonMatch} onClose={() => { setComparisonMatch(null); setHeatmapBase64(null) }} maxWidth={resolvedOriginalUrl && resolvedMediaType === 'image' ? 'max-w-7xl' : 'max-w-5xl'}>
+      <Modal open={!!comparisonMatch} onClose={() => { setComparisonMatch(null); setHeatmapBase64(null); setSyncResult(null) }} maxWidth={resolvedOriginalUrl && resolvedMediaType === 'image' ? 'max-w-7xl' : 'max-w-5xl'}>
         {comparisonMatch && (
           <>
-            <ModalHeader title={`Authenticity Check — ${comparisonMatch.similarity?.toFixed(1)}% Match`} onClose={() => { setComparisonMatch(null); setHeatmapBase64(null) }} icon={<Search size={18} className="text-[#12AAFF]" />} />
+            <ModalHeader title={`Authenticity Check — ${comparisonMatch.similarity?.toFixed(1)}% Match`} onClose={() => { setComparisonMatch(null); setHeatmapBase64(null); setSyncResult(null) }} icon={<Search size={18} className="text-[#12AAFF]" />} />
             <div className="p-5 flex flex-col gap-4">
               <div className="grid gap-3" style={{ gridTemplateColumns: resolvedOriginalUrl && resolvedMediaType === 'image' ? '1fr 1fr 1fr' : '1fr 1fr' }}>
                 <div className="flex flex-col gap-1.5">
@@ -143,8 +163,48 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                   <div className="text-[var(--text-3)]">Registered: {comparisonMatch.registeredAt}</div>
                 </div>
               </div>
+
+              {/* Temporal Integrity & Deepfake Sync */}
+              {(comparisonMatch.temporalIntegrity !== undefined || comparisonMatch.mediaType === 'video') && (
+                <div className="flex flex-col gap-3 border-t border-[var(--border)] pt-4">
+                  {comparisonMatch.temporalIntegrity !== undefined && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 p-3 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl">
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-2)] mb-1">Temporal Sequence Integrity (DTW)</div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={comparisonMatch.temporalIntegrity > 90 ? 'success' : 'danger'}>{comparisonMatch.temporalIntegrity.toFixed(1)}%</Badge>
+                          <span className="text-xs text-[var(--text-3)]">{comparisonMatch.temporalIntegrity > 90 ? 'Video sequence matches original temporally.' : 'Video may be chopped, reversed, or sped-up!'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {comparisonMatch.mediaType === 'video' && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 p-3 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl flex items-center justify-between">
+                        <div>
+                          <div className="text-[11px] font-bold uppercase tracking-wider text-[var(--text-2)] mb-1">Deepfake Audio-Visual Sync</div>
+                          <div className="text-xs text-[var(--text-3)]">Analyze lip movements and audio to detect AI voice-swaps.</div>
+                        </div>
+                        {syncResult ? (
+                          <div className="text-right">
+                            <Badge variant={syncResult.is_deepfake ? 'danger' : 'success'}>
+                              {syncResult.is_deepfake ? 'DEEPFAKE DETECTED' : 'Sync Normal'}
+                            </Badge>
+                            <div className="text-[10px] text-[var(--text-3)] mt-1">Score: {syncResult.sync_score?.toFixed(2)}</div>
+                          </div>
+                        ) : (
+                          <Button size="sm" onClick={handleAnalyzeSync} disabled={syncLoading}>
+                            {syncLoading ? <Spinner /> : 'Run AI Analysis'}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
             </div>
-            <div className="px-5 py-3 border-t border-[var(--border)] bg-[var(--bg-2)] flex justify-center"><Button variant="primary" onClick={() => { setComparisonMatch(null); setHeatmapBase64(null) }}>Back to Results</Button></div>
+            <div className="px-5 py-3 border-t border-[var(--border)] bg-[var(--bg-2)] flex justify-center"><Button variant="primary" onClick={() => { setComparisonMatch(null); setHeatmapBase64(null); setSyncResult(null) }}>Back to Results</Button></div>
           </>
         )}
       </Modal>
@@ -176,6 +236,11 @@ function MatchCard({ result, onSelect }) {
         {result.assetId && <div className="text-xs"><span className="text-[var(--text-3)]">Asset: </span><span className="font-mono text-[#12AAFF]">{result.assetId}</span></div>}
         {result.creator && <div className="text-xs"><span className="text-[var(--text-3)]">Creator: </span><a href={`${ARBITRUM_SEPOLIA.explorer}/address/${result.creator}`} target="_blank" rel="noopener noreferrer" className="font-mono text-[#12AAFF] hover:opacity-80" onClick={(e) => e.stopPropagation()}>{result.creator.slice(0, 10)}...{result.creator.slice(-6)}</a></div>}
         {result.registeredAt && <div className="text-xs text-[var(--text-3)]">Registered: {result.registeredAt}</div>}
+        <div className="flex flex-wrap items-center gap-2 mt-2">
+          {result.mediaS3Url && <a href={getGatewayUrl(result.mediaS3Url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00D395]/10 hover:bg-[#00D395]/20 text-[#00D395] rounded-md text-[11px] font-bold border border-[#00D395]/20 transition-colors" onClick={(e) => e.stopPropagation()}><ExternalLink size={12} /> S3 Media</a>}
+          {result.mediaIpfsUrl && <a href={getGatewayUrl(result.mediaIpfsUrl)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#12AAFF]/10 hover:bg-[#12AAFF]/20 text-[#12AAFF] rounded-md text-[11px] font-bold border border-[#12AAFF]/20 transition-colors" onClick={(e) => e.stopPropagation()}><ExternalLink size={12} /> IPFS Media</a>}
+          {result.ipfsCid && <a href={`https://gateway.pinata.cloud/ipfs/${result.ipfsCid}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-3)] hover:bg-[var(--border)] text-[var(--text-2)] rounded-md text-[11px] font-bold border border-[var(--border)] transition-colors" onClick={(e) => e.stopPropagation()}><ExternalLink size={12} /> IPFS JSON</a>}
+        </div>
       </div>
       <div className="flex items-center justify-center px-5 flex-shrink-0">
         <div className="text-center">

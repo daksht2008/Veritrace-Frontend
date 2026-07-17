@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ethers } from 'ethers'
 import { useAccount, useWriteContract, useConfig, useSwitchChain } from 'wagmi'
@@ -18,7 +18,7 @@ import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
 import { useUpload } from '../context/UploadContext'
 import { downloadCertificate } from '../utils/generateCertificate'
-import { Upload, FingerprintPattern as Fingerprint, Shield, CircleCheck as CheckCircle2, FilePlus, TriangleAlert as AlertTriangle, ExternalLink, Award, Bot, Webhook, Lock, Cpu, Database, Server } from 'lucide-react'
+import { Upload, Fingerprint, Shield, CircleCheck as CheckCircle2, FilePlus, TriangleAlert as AlertTriangle, ExternalLink, Award, Bot, Webhook, FileText, Type } from 'lucide-react'
 import {
   HASH_ENGINE_API, CORE_BACKEND_API, CONTRACT_ADDRESS, CONTRACT_ABI, ARBITRUM_SEPOLIA,
 } from '../config'
@@ -50,10 +50,25 @@ export default function RegisterPage() {
 
   const [allowAiTraining, setAllowAiTraining] = useState(true)
   const [webhookUrl, setWebhookUrl] = useState('')
+  const [inputType, setInputType] = useState('media')
+  const [textContent, setTextContent] = useState('')
   const [showAllKeyframes, setShowAllKeyframes] = useState(false)
 
-  let maxConf = hashes.aiConfidenceScore || 0
-  if (hashes.keyframes) {
+  // Dynamically create a file from text input
+  useEffect(() => {
+    if (inputType === 'text') {
+      if (textContent.trim()) {
+        const textBlob = new Blob([textContent], { type: 'text/plain' })
+        const newFile = new File([textBlob], 'article.txt', { type: 'text/plain' })
+        setFile(newFile)
+      } else {
+        setFile(null)
+      }
+    }
+  }, [textContent, inputType, setFile])
+
+  let maxConf = hashes?.aiConfidenceScore || 0
+  if (hashes?.keyframes) {
     hashes.keyframes.forEach(kf => { if (kf.ai_confidence_score > maxConf) maxConf = kf.ai_confidence_score })
   }
   const showAiRequirement = aiCategory === 'None (Authentic Content)' && maxConf > 0.75
@@ -62,7 +77,7 @@ export default function RegisterPage() {
     setFile(f); setError(null); setTxResult(null); setUploadProgress(0)
     if (!f) {
       setStep(1)
-      setHashes({ sha256: null, hashCount: null, assetId: null, mediaType: null })
+      setHashes(null)
       return
     }
     try {
@@ -143,7 +158,14 @@ export default function RegisterPage() {
       })
       const receipt = await waitForTransactionReceipt(config, { hash: txHash })
       try { localStorage.setItem(`vt_media_${sha256Bytes32.toLowerCase()}`, JSON.stringify({ sha256: sha256Bytes32, media_ipfs_url: mediaIpfsUrl, media_s3_url: mediaS3Url, media_type: hashes.mediaType || 'image', ipfsCid, keyframes: hashes.keyframes || [] })) } catch {}
-      setTxResult({ hash: receipt.transactionHash, blockNumber: Number(receipt.blockNumber), mediaIpfsUrl, mediaS3Url, ipfsCid, sha256: sha256Bytes32 })
+      setTxResult({ 
+        hash: receipt.transactionHash, 
+        blockNumber: Number(receipt.blockNumber), 
+        ipfsCid: pinMetaData.ipfs_cid || '',
+        mediaS3Url: mediaS3Url || '',
+        mediaIpfsUrl: mediaIpfsUrl || '',
+        sha256: sha256Bytes32 
+      })
       setStep(4)
     } catch (err) {
       let message = err.message
@@ -156,7 +178,7 @@ export default function RegisterPage() {
 
   const resetFlow = () => {
     setFile(null); setStep(1)
-    setHashes({ sha256: null, hashCount: null, assetId: null, mediaType: null })
+    setHashes(null)
     setTxResult(null); setError(null); setAiTool('')
   }
 
@@ -170,19 +192,34 @@ export default function RegisterPage() {
       <StepIndicator steps={['Upload File', 'Generate Hashes', 'Sign & Register', 'Confirmed']} currentStep={step} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        {/* LEFT */}
         <div className="flex flex-col gap-5">
           <SpotlightCard>
             <Card className="card-hover-glow">
               <CardHeader>
-                <CardTitle><Upload size={16} className="text-[#12AAFF]" /> File Upload</CardTitle>
+                <CardTitle className="flex justify-between items-center">
+                  <span className="flex items-center gap-2"><Upload size={16} className="text-[#12AAFF]" /> Provide Content</span>
+                </CardTitle>
               </CardHeader>
-              <CardBody><FileUpload onFileSelected={handleFileSelected} /></CardBody>
+              <CardBody className="flex flex-col gap-4">
+                <div className="flex bg-[var(--bg-2)] p-1 rounded-xl border border-[var(--border)]">
+                  <button onClick={() => { setInputType('media'); setFile(null); setStep(1); setHashes(null); setError(null) }} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-colors ${inputType === 'media' ? 'bg-[var(--surface)] text-[var(--text)] shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text-2)]'}`}><FileText size={16} /> Media File</button>
+                  <button onClick={() => { setInputType('text'); setFile(null); setStep(1); setHashes(null); setError(null) }} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-colors ${inputType === 'text' ? 'bg-[var(--surface)] text-[var(--text)] shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text-2)]'}`}><Type size={16} /> Text Article</button>
+                </div>
+                {inputType === 'media' ? (
+                  <FileUpload onFileSelected={handleFileSelected} label="Drop your file here to prepare for registry" />
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <textarea className="w-full h-32 p-3 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl text-sm focus:border-[#12AAFF] focus:outline-none resize-none" placeholder="Paste your article or text content here to register it on the blockchain..." value={textContent} onChange={(e) => setTextContent(e.target.value)} />
+                    <div className="text-[10px] text-[var(--text-3)] text-right">{textContent.length} characters</div>
+                    <Button onClick={() => handleFileSelected(file)} disabled={!textContent.trim()}>Generate Hash</Button>
+                  </div>
+                )}
+              </CardBody>
             </Card>
           </SpotlightCard>
 
           <AnimatePresence>
-            {(processing || hashes.sha256) && (
+            {(processing || hashes) && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
                 <Card className="card-hover-glow">
                   <CardHeader>
@@ -265,7 +302,7 @@ export default function RegisterPage() {
                         </>
                       ) : (
                         <div className="text-center py-4">
-                          <div className="relative w-16 h-16 flex items-center justify-center mb-3">
+                          <div className="relative w-16 h-16 mx-auto flex items-center justify-center mb-3">
                             <div className="loading-orb-outer absolute inset-0 rounded-full" style={{ border: '2.5px solid var(--border)', borderTopColor: '#12AAFF', borderRightColor: '#12AAFF' }} />
                             <div className="loading-orb-inner absolute inset-1.5 rounded-full" style={{ border: '2.5px solid var(--border)', borderBottomColor: '#00D395', borderLeftColor: '#00D395' }} />
                             <ArbitrumLogo size={20} animated />
@@ -314,7 +351,7 @@ export default function RegisterPage() {
 
                   {step === 3 && signing && (
                     <motion.div key="signing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-8">
-                      <div className="relative w-16 h-16 flex items-center justify-center mb-3">
+                      <div className="relative w-16 h-16 mx-auto flex items-center justify-center mb-3">
                         <div className="loading-orb-outer absolute inset-0 rounded-full" style={{ border: '2.5px solid var(--border)', borderTopColor: '#12AAFF', borderRightColor: '#12AAFF' }} />
                         <div className="loading-orb-inner absolute inset-1.5 rounded-full" style={{ border: '2.5px solid var(--border)', borderBottomColor: '#00D395', borderLeftColor: '#00D395' }} />
                         <ArbitrumLogo size={20} animated />
@@ -336,7 +373,11 @@ export default function RegisterPage() {
                         <TxRow label="Tx Hash"><a href={`${ARBITRUM_SEPOLIA.explorer}/tx/${txResult.hash}`} target="_blank" rel="noopener noreferrer" className="text-[#12AAFF] hover:opacity-80 font-mono">{txResult.hash.slice(0, 16)}...{txResult.hash.slice(-8)}</a></TxRow>
                         <TxRow label="Block" value={txResult.blockNumber?.toString()} />
                         <TxRow label="Status"><Badge variant="success">Confirmed</Badge></TxRow>
-                        {txResult.ipfsCid && <TxRow label="Metadata (IPFS)"><a href={`https://gateway.pinata.cloud/ipfs/${txResult.ipfsCid}`} target="_blank" rel="noopener noreferrer" className="text-[#12AAFF] hover:opacity-80">View ↗</a></TxRow>}
+                        <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[var(--border)]">
+                          {txResult.mediaS3Url && <a href={txResult.mediaS3Url?.startsWith('ipfs://') ? `https://gateway.pinata.cloud/ipfs/${txResult.mediaS3Url.slice(7)}` : txResult.mediaS3Url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#00D395]/10 hover:bg-[#00D395]/20 text-[#00D395] rounded-md text-[11px] font-bold border border-[#00D395]/20 transition-colors"><ExternalLink size={12} /> S3 Media</a>}
+                          {txResult.mediaIpfsUrl && <a href={txResult.mediaIpfsUrl?.startsWith('ipfs://') ? `https://gateway.pinata.cloud/ipfs/${txResult.mediaIpfsUrl.slice(7)}` : txResult.mediaIpfsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#12AAFF]/10 hover:bg-[#12AAFF]/20 text-[#12AAFF] rounded-md text-[11px] font-bold border border-[#12AAFF]/20 transition-colors"><ExternalLink size={12} /> IPFS Media</a>}
+                          {txResult.ipfsCid && <a href={`https://gateway.pinata.cloud/ipfs/${txResult.ipfsCid}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--surface-3)] hover:bg-[var(--border)] text-[var(--text-2)] rounded-md text-[11px] font-bold border border-[var(--border)] transition-colors"><ExternalLink size={12} /> IPFS JSON</a>}
+                        </div>
                       </div>
 
                       <div className="flex flex-col gap-2">
