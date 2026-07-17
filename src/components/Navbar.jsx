@@ -2,7 +2,8 @@ import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
-import { FilePlus, Search, Library, Info, Menu, X, ChevronDown, Wallet, Sun, Moon } from 'lucide-react'
+import { FilePlus, Search, Library, Info, Menu, X, ChevronDown, Wallet, Sun, Moon, Copy, LogOut, Check } from 'lucide-react'
+import { toast } from 'sonner'
 import { ARBITRUM_SEPOLIA } from '../config'
 import { VeriTraceLogo, ArbitrumLogo } from './ArbitrumLogo'
 import { cn } from '@/lib/utils'
@@ -167,6 +168,7 @@ function WalletButton() {
   const { disconnect } = useDisconnect()
   const { switchChain } = useSwitchChain()
   const [showDropdown, setShowDropdown] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (isConnected && (!chain || chain.id !== ARBITRUM_SEPOLIA.chainId)) {
@@ -176,16 +178,60 @@ function WalletButton() {
 
   const formatAddress = (addr) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
+  const copyAddress = async () => {
+    if (!address) return
+    try {
+      await navigator.clipboard.writeText(address)
+      setCopied(true)
+      toast.success('Wallet address copied')
+      window.setTimeout(() => setCopied(false), 1800)
+    } catch {
+      toast.error('Could not copy wallet address')
+    }
+  }
+
   if (isConnected && address) {
     return (
-      <button
-        onClick={() => disconnect()}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-xl glass hover:shadow-md transition-all"
-      >
-        <span className="live-dot" />
-        <span className="font-mono text-xs hidden sm:inline">{formatAddress(address)}</span>
-        <ArbitrumLogo size={14} />
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setShowDropdown(value => !value)}
+          className="wallet-account-trigger flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-xl active:scale-[.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF]"
+          aria-expanded={showDropdown}
+          aria-label="Open wallet account menu"
+        >
+          <span className="live-dot" />
+          <span className="font-mono text-xs hidden sm:inline">{formatAddress(address)}</span>
+          <ArbitrumLogo size={14} />
+          <ChevronDown size={12} className={cn('transition-transform', showDropdown && 'rotate-180')} />
+        </button>
+
+        <AnimatePresence>
+          {showDropdown && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+              <motion.div
+                initial={{ opacity: 0, y: -8, scale: .98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: .98 }}
+                transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                className="absolute top-full right-0 mt-2 w-72 glass rounded-2xl shadow-2xl p-2 z-50"
+              >
+                <div className="px-3 py-2.5 border-b border-[var(--border)]">
+                  <div className="text-[10px] uppercase tracking-[.14em] font-bold text-[var(--text-4)]">Connected wallet</div>
+                  <div className="font-mono text-xs text-[var(--text)] mt-1 break-all">{address}</div>
+                </div>
+                <button onClick={copyAddress} className="w-full mt-1.5 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--bg-2)] active:scale-[.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF]">
+                  <span className="flex items-center gap-2"><Copy size={15} /> Copy address</span>
+                  {copied ? <Check size={15} className="text-[#00D395]" /> : <span className="text-[10px] font-mono text-[var(--text-4)]">{formatAddress(address)}</span>}
+                </button>
+                <button onClick={() => { disconnect(); setShowDropdown(false) }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-[#FF6B6B] hover:bg-[var(--danger-bg)] active:scale-[.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D4D]">
+                  <LogOut size={15} /> Disconnect wallet
+                </button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
     )
   }
 
