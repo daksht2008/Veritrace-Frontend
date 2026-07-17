@@ -5,7 +5,7 @@ import { ExternalLink } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[var(--border)] bg-[var(--bg-2)] mt-16">
+    <footer className="border-t border-[var(--border)] bg-[color-mix(in_srgb,var(--bg-2)_88%,transparent)] backdrop-blur-xl mt-16 overflow-hidden">
       <div className="max-w-[1280px] mx-auto px-5 py-10">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="md:col-span-2">

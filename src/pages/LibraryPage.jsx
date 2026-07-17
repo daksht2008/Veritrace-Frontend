@@ -12,6 +12,7 @@ import { Modal, ModalHeader } from '../components/ui/modal'
 import { Alert } from '../components/ui/alert'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
+import PageHero from '../components/PageHero'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, ARBITRUM_SEPOLIA } from '../config'
 import { Library as LibraryIcon, Eye, ExternalLink, Download, Lock, Shield } from 'lucide-react'
 
@@ -71,11 +72,9 @@ export default function LibraryPage() {
   const formatAddress = (addr) => `${addr.slice(0, 6)}...${addr.slice(-4)}`
 
   return (
-    <section className="max-w-[1280px] mx-auto px-5 pt-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-extrabold mb-1 text-[var(--text)]">On-Chain Asset Library</h1>
-        <p className="text-sm text-[var(--text-3)]">Immutable history of all registered media assets parsed directly from Arbitrum Sepolia logs</p>
-      </div>
+    <section>
+      <PageHero eyebrow="PUBLIC PROVENANCE LEDGER" title="Explore the registry." description="A living, transparent record of media and text registrations, read directly from the Arbitrum Sepolia event log." icon={LibraryIcon} />
+      <div className="max-w-[1280px] mx-auto px-5 pt-7">
 
       {error && <div className="mb-5"><Alert variant="danger">{error}</Alert></div>}
 
@@ -176,6 +175,7 @@ export default function LibraryPage() {
           </>
         )}
       </Modal>
+      </div>
     </section>
   )
 }

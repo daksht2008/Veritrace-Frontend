@@ -1,22 +1,21 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import VerifyPage from './pages/VerifyPage'
 import LibraryPage from './pages/LibraryPage'
 import AboutPage from './pages/AboutPage'
 import { Toaster } from './components/ui/sonner'
+import AppShell from './components/AppShell'
 
 // Page wrapper for transitions
 function PageWrapper({ children }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
+      exit={{ opacity: 0, y: -4 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 28, mass: 0.45 }}
       className="w-full"
     >
       {children}
@@ -29,8 +28,7 @@ function App() {
   
   return (
     <>
-      <Navbar />
-      <main className="min-h-[calc(100vh-200px)] pb-8">
+      <AppShell>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
@@ -41,9 +39,8 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AnimatePresence>
-      </main>
+      </AppShell>
       <Toaster />
-      <Footer />
     </>
   )
 }

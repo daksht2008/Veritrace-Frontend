@@ -14,7 +14,7 @@ import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { TextReveal } from '../components/aceternity/TextReveal'
 import { BeamLine } from '../components/aceternity/BeamLine'
 import { ArbitrumLogo, ArbitrumOrbit, AnimatedArbitrumBadge, AnimatedNetworkBadge } from '../components/ArbitrumLogo'
-import { FilePlus, Search, Shield, ArrowRight, Upload, FingerprintPattern as Fingerprint, Wallet, CircleCheck as CheckCircle2, Database, Layers, Sparkles, Zap, Eye, Link2, Cpu, Server, Pin, GitBranch, ChevronRight, ChevronLeft } from 'lucide-react'
+import { FilePlus, Search, Shield, ArrowRight, Upload, FingerprintPattern as Fingerprint, Wallet, CircleCheck as CheckCircle2, Database, Layers, Sparkles, Zap, Eye, Link2, Cpu, Server, Pin, GitBranch, ChevronRight, ChevronLeft, Image as ImageIcon, Video, FileText, Play } from 'lucide-react'
 import { SUPPORTED_FILES, CONTRACT_ADDRESS, ARBITRUM_SEPOLIA } from '../config'
 
 export default function HomePage() {
@@ -41,7 +41,7 @@ export default function HomePage() {
   return (
     <>
       {/* ════ HERO ════ */}
-      <AuroraBackground className="pt-12 pb-20">
+      <AuroraBackground className="home-hero pt-14 pb-24">
         <div className="max-w-[1280px] mx-auto px-5 text-center relative z-10">
           <ParticleField density={40} />
 
@@ -55,7 +55,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-5 text-[var(--text)]">
+            <h1 className="home-hero-title text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-5 text-[var(--text)]">
               Prove what's <span className="gradient-arb">real.</span>
               <br />
               <span className="text-[var(--text-2)] font-bold">Trace what's not.</span>
@@ -223,12 +223,12 @@ export default function HomePage() {
             <h2 className="text-sm font-bold flex items-center gap-2 text-[var(--text)]"><Database size={16} className="text-[#12AAFF]" /> Supported File Formats</h2>
           </div>
           <CardBody>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {Object.entries(SUPPORTED_FILES).map(([key, cat]) => (
-                <div key={key} className="flex gap-3 items-start">
-                  <span className="text-2xl">{cat.icon}</span>
-                  <div>
-                    <div className="font-semibold text-sm mb-1.5 text-[var(--text)]">{cat.label}</div>
+                <div key={key} className="format-preview-card">
+                  <FormatPreview type={key} />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-sm mb-2 text-[var(--text)]">{cat.label}</div>
                     <div className="flex flex-wrap gap-1.5">
                       {cat.extensions.map(ext => (
                         <span key={ext} className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[var(--bg-2)] border border-[var(--border)] text-[var(--text-3)]">{ext}</span>
@@ -242,6 +242,32 @@ export default function HomePage() {
         </Card>
       </section>
     </>
+  )
+}
+
+function FormatPreview({ type }) {
+  if (type === 'image') return (
+    <div className="format-preview format-image" aria-label="Image preview">
+      <div className="format-sun" />
+      <div className="format-mountain format-mountain-one" />
+      <div className="format-mountain format-mountain-two" />
+      <ImageIcon size={14} className="format-preview-icon" />
+    </div>
+  )
+  if (type === 'video') return (
+    <div className="format-preview format-video" aria-label="Video preview">
+      <div className="format-video-frame"><div /><div /><div /></div>
+      <span className="format-play"><Play size={11} fill="currentColor" /></span>
+      <div className="format-timeline"><span /></div>
+      <Video size={14} className="format-preview-icon" />
+    </div>
+  )
+  return (
+    <div className="format-preview format-document" aria-label="Document preview">
+      <div className="format-document-sheet"><span /><span /><span /><span /></div>
+      <FileText size={14} className="format-preview-icon" />
+      <div className="format-document-seal" />
+    </div>
   )
 }
 

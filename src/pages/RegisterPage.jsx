@@ -19,6 +19,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
 import { toast } from 'sonner'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
+import PageHero from '../components/PageHero'
 import { useUpload } from '../context/UploadContext'
 import { downloadCertificate } from '../utils/generateCertificate'
 import { Upload, Fingerprint, Shield, CircleCheck as CheckCircle2, FilePlus, TriangleAlert as AlertTriangle, ExternalLink, Award, Bot, Webhook, FileText, Type } from 'lucide-react'
@@ -190,15 +191,12 @@ export default function RegisterPage() {
   }
 
   return (
-    <section className="max-w-[1280px] mx-auto px-5 pt-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-extrabold mb-1 text-[var(--text)]">Register Content</h1>
-        <p className="text-sm text-[var(--text-3)]">Upload a file to fingerprint and register its authenticity on-chain</p>
-      </div>
-
+    <section>
+      <PageHero eyebrow="CREATE AN IMMUTABLE RECORD" title="Register your original work." description="Create a durable provenance trail for media and text. Your fingerprints are anchored to Arbitrum, while your work stays identifiable everywhere it travels." icon={FilePlus} />
+      <div className="max-w-[1280px] mx-auto px-5 pt-7">
       <StepIndicator steps={['Upload File', 'Generate Hashes', 'Sign & Register', 'Confirmed']} currentStep={step} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
         <div className="flex flex-col gap-5">
           <SpotlightCard>
             <Card className="card-hover-glow">
@@ -415,6 +413,7 @@ export default function RegisterPage() {
             </CardBody>
           </Card>
         </div>
+      </div>
       </div>
     </section>
   )

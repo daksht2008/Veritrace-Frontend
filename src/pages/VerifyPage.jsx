@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import { Progress } from '../components/ui/progress'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
+import PageHero from '../components/PageHero'
 import { useUpload } from '../context/UploadContext'
 import { config } from '../wagmiConfig'
 import {
@@ -132,12 +133,9 @@ export default function VerifyPage() {
   }
 
   return (
-    <section className="max-w-[1280px] mx-auto px-5 pt-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-extrabold mb-1 text-[var(--text)]">Verify & Search Content</h1>
-        <p className="text-sm text-[var(--text-3)]">Upload a file to check if it's registered or search for visual matches in the database</p>
-      </div>
-
+    <section>
+      <PageHero eyebrow="AUTHENTICITY INTELLIGENCE" title="Know what you’re looking at." description="Test a file against on-chain records, visual fingerprints, and similarity signals to identify originals, derivatives, and suspicious edits." icon={Search} />
+      <div className="max-w-[1280px] mx-auto px-5 pt-7">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-5">
         {/* LEFT */}
         <div className="flex flex-col gap-5">
@@ -259,6 +257,7 @@ export default function VerifyPage() {
             </Card>
           </SpotlightCard>
         </div>
+      </div>
       </div>
     </section>
   )

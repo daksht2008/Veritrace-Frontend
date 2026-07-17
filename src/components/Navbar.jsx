@@ -6,6 +6,7 @@ import { FilePlus, Search, Library, Info, Menu, X, ChevronDown, Wallet, Sun, Moo
 import { ARBITRUM_SEPOLIA } from '../config'
 import { VeriTraceLogo, ArbitrumLogo } from './ArbitrumLogo'
 import { cn } from '@/lib/utils'
+import { useTheme } from './providers/ExperienceProvider'
 
 const navItems = [
   { path: '/', label: 'Home', icon: null },
@@ -19,16 +20,7 @@ export default function Navbar() {
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('theme')
-    if (saved) return saved
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
-  })
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('theme', theme)
-  }, [theme])
+  const { theme, toggleTheme } = useTheme()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -49,29 +41,29 @@ export default function Navbar() {
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className={cn(
           'fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300',
-          'w-[calc(100%-2rem)] max-w-[920px]'
+          'w-[calc(100%-2rem)] max-w-[1080px]'
         )}
       >
         <div className={cn(
           'flex items-center justify-between h-14 px-3 rounded-2xl transition-all duration-300',
-          '!border-2 !border-[var(--border-2)] hover:!border-[#12AAFF]/40',
+          '!border !border-[var(--border-2)] hover:!border-[#12AAFF]/40',
           scrolled ? 'glass shadow-[0_8px_32px_rgba(0,0,0,0.12)]' : 'glass'
         )}>
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 pl-1">
             <VeriTraceLogo size={28} />
             <span className="text-base font-extrabold tracking-tight">
-              <span className="gradient-arb">Veri</span><span className="text-[var(--text)]">Trace</span>
+              <span className="gradient-arb">Veri</span><span className="text-[var(--text)]">Trace</span><span className="hidden lg:inline ml-2 text-[9px] uppercase tracking-[.16em] text-[var(--text-4)]">Protocol</span>
             </span>
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-0.5">
+          <motion.div initial="hidden" animate="visible" variants={{ hidden: {}, visible: { transition: { staggerChildren: .045 } } }} className="hidden md:flex items-center gap-0.5">
             {navItems.map((item) => {
               const Icon = item.icon
               return (
+                <motion.div key={item.path} variants={{ hidden: { opacity: 0, y: -6 }, visible: { opacity: 1, y: 0 } }}>
                 <Link
-                  key={item.path}
                   to={item.path}
                   className={cn(
                     'flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200',
@@ -90,16 +82,17 @@ export default function Navbar() {
                     />
                   )}
                 </Link>
+                </motion.div>
               )
             })}
-          </div>
+          </motion.div>
 
           {/* Right side */}
           <div className="flex items-center gap-2">
             {/* Theme toggle */}
             <button
-              onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-2)] hover:bg-[var(--bg-2)] hover:text-[var(--text)] transition-colors"
+              onClick={toggleTheme}
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-2)] hover:bg-[var(--bg-2)] hover:text-[var(--text)] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
               aria-label="Toggle theme"
             >
               <AnimatePresence mode="wait">
@@ -119,7 +112,7 @@ export default function Navbar() {
 
             {/* Mobile menu button */}
             <button
-              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-2)] hover:bg-[var(--bg-2)]"
+              className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center text-[var(--text-2)] hover:bg-[var(--bg-2)] active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF]"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X size={18} /> : <Menu size={18} />}
