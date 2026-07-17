@@ -61,8 +61,7 @@ export default function Footer() {
       </div>
       <div className="w-full flex justify-center overflow-hidden h-[9vw] pointer-events-none select-none mt-8 border-t border-[var(--border)] pt-8 relative">
         <div 
-          className="text-[15vw] font-black leading-[0.75] tracking-tighter text-transparent opacity-80"
-          style={{ WebkitTextStroke: '2px var(--text)' }}
+          className="text-[15vw] font-black leading-[0.75] tracking-tighter text-[var(--text)] opacity-90 transition-colors"
         >
           VERITRACE
         </div>

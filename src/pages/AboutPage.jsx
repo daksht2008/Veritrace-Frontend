@@ -42,6 +42,8 @@ const FAQ = [
   { q: 'Is the verification free?', a: 'Verification (exact, fuzzy, segmented) is free — it only hits the Go backend API. Only registration requires a gas-paid blockchain transaction.' },
 ]
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion'
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen">
@@ -138,7 +140,9 @@ export default function AboutPage() {
       <section className="max-w-[760px] mx-auto px-5 pb-16">
         <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Frequently Asked Questions</h2>
         <p className="text-center text-sm text-[var(--text-3)] mb-8">Everything you need to know about VeriTrace</p>
-        <div className="flex flex-col gap-3">{FAQ.map((f, i) => <FaqItem key={i} {...f} />)}</div>
+        <Accordion type="single" collapsible className="w-full">
+          {FAQ.map((f, i) => <FaqItem key={i} {...f} i={i} />)}
+        </Accordion>
       </section>
 
       {/* CTA */}
@@ -172,11 +176,15 @@ function StepCard({ num, title, desc, icon: Icon, color, delay }) {
   )
 }
 
-function FaqItem({ q, a }) {
+function FaqItem({ q, a, i }) {
   return (
-    <details className="group bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-[var(--border-2)] transition-colors">
-      <summary className="p-4 cursor-pointer font-semibold text-sm flex items-center justify-between list-none select-none text-[var(--text)]">{q}<ChevronDown size={18} className="text-[#12AAFF] flex-shrink-0 group-open:rotate-180 transition-transform" /></summary>
-      <div className="px-4 pb-4 text-xs text-[var(--text-3)] leading-relaxed border-t border-[var(--border)] pt-3">{a}</div>
-    </details>
+    <AccordionItem value={`item-${i}`} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-[var(--border-2)] transition-colors mb-3 px-2 border-b-0">
+      <AccordionTrigger className="p-4 font-semibold text-sm hover:no-underline text-[var(--text)] data-[state=open]:text-[#12AAFF] [&[data-state=open]>svg]:rotate-180">
+        {q}
+      </AccordionTrigger>
+      <AccordionContent className="px-4 pb-4 text-xs text-[var(--text-3)] leading-relaxed border-t border-[var(--border)] pt-3">
+        {a}
+      </AccordionContent>
+    </AccordionItem>
   )
 }

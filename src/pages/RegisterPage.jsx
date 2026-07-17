@@ -14,6 +14,9 @@ import { Alert } from '../components/ui/alert'
 import { Progress } from '../components/ui/progress'
 import { Spinner } from '../components/ui/spinner'
 import { Select } from '../components/ui/input'
+import { Skeleton } from '../components/ui/skeleton'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs'
+import { toast } from 'sonner'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
 import { useUpload } from '../context/UploadContext'
@@ -103,7 +106,10 @@ export default function RegisterPage() {
         audioHashes: data.audio_hashes || [], keyframes: data.keyframes || [],
       })
       setStep(2)
-    } catch (err) { setError(`Failed to compute hashes: ${err.message}`) }
+    } catch (err) { 
+      setError(`Failed to compute hashes: ${err.message}`)
+      toast.error(`Failed to compute hashes: ${err.message}`)
+    }
     finally { setProcessing(false) }
   }
 
@@ -173,6 +179,7 @@ export default function RegisterPage() {
       else if (message.includes('user rejected') || message.includes('User rejected')) message = 'Transaction was rejected in your wallet.'
       else if (message.includes('insufficient funds')) message = 'Insufficient ETH for gas. Get free testnet ETH from the Lampros DAO Faucet.'
       setError(message); setStep(2)
+      toast.error(`Registration failed: ${message}`)
     } finally { setSigning(false) }
   }
 
@@ -201,19 +208,22 @@ export default function RegisterPage() {
                 </CardTitle>
               </CardHeader>
               <CardBody className="flex flex-col gap-4">
-                <div className="flex bg-[var(--bg-2)] p-1 rounded-xl border border-[var(--border)]">
-                  <button onClick={() => { setInputType('media'); setFile(null); setStep(1); setHashes(null); setError(null) }} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-colors ${inputType === 'media' ? 'bg-[var(--surface)] text-[var(--text)] shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text-2)]'}`}><FileText size={16} /> Media File</button>
-                  <button onClick={() => { setInputType('text'); setFile(null); setStep(1); setHashes(null); setError(null) }} className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-colors ${inputType === 'text' ? 'bg-[var(--surface)] text-[var(--text)] shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text-2)]'}`}><Type size={16} /> Text Article</button>
-                </div>
-                {inputType === 'media' ? (
-                  <FileUpload onFileSelected={handleFileSelected} label="Drop your file here to prepare for registry" />
-                ) : (
-                  <div className="flex flex-col gap-2">
+                <Tabs value={inputType} onValueChange={(val) => { setInputType(val); setFile(null); setStep(1); setHashes(null); setError(null) }} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-4 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl">
+                    <TabsTrigger value="media" className="data-[state=active]:bg-[var(--surface)] rounded-lg py-1.5"><FileText size={16} className="mr-2" /> Media File</TabsTrigger>
+                    <TabsTrigger value="text" className="data-[state=active]:bg-[var(--surface)] rounded-lg py-1.5"><Type size={16} className="mr-2" /> Text Article</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="media">
+                    <FileUpload onFileSelected={handleFileSelected} label="Drop your file here to prepare for registry" />
+                  </TabsContent>
+                  
+                  <TabsContent value="text" className="flex flex-col gap-2 mt-0">
                     <textarea className="w-full h-32 p-3 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl text-sm focus:border-[#12AAFF] focus:outline-none resize-none" placeholder="Paste your article or text content here to register it on the blockchain..." value={textContent} onChange={(e) => setTextContent(e.target.value)} />
                     <div className="text-[10px] text-[var(--text-3)] text-right">{textContent.length} characters</div>
                     <Button onClick={() => handleFileSelected(file)} disabled={!textContent.trim()}>Generate Hash</Button>
-                  </div>
-                )}
+                  </TabsContent>
+                </Tabs>
               </CardBody>
             </Card>
           </SpotlightCard>
@@ -229,8 +239,8 @@ export default function RegisterPage() {
                   <CardBody className="flex flex-col gap-3">
                     {processing ? (
                       <div className="p-3 rounded-xl bg-[var(--bg-2)] border border-[var(--border)]">
-                        <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)] mb-1.5">SHA-256 CRYPTOGRAPHIC HASH</div>
-                        <div className="skeleton h-9 rounded-lg w-full" />
+                        <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)] mb-2">SHA-256 CRYPTOGRAPHIC HASH</div>
+                        <Skeleton className="h-9 rounded-lg w-full bg-[var(--border)]" />
                       </div>
                     ) : (
                       <>
@@ -390,7 +400,6 @@ export default function RegisterPage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                {error && <div className="mt-3"><Alert variant="danger">{error}</Alert></div>}
               </CardBody>
             </Card>
           </SpotlightCard>

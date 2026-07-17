@@ -10,6 +10,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { UploadProvider } from './context/UploadContext'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { TooltipProvider } from './components/ui/tooltip'
 import { config } from './wagmiConfig'
 import './index.css'
 import App from './App.jsx'
@@ -22,7 +23,9 @@ createRoot(document.getElementById('root')).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <UploadProvider>
-            <App />
+            <TooltipProvider delayDuration={200}>
+              <App />
+            </TooltipProvider>
           </UploadProvider>
         </BrowserRouter>
       </QueryClientProvider>
