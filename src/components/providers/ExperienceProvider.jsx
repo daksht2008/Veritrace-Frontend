@@ -12,6 +12,7 @@ const getInitialTheme = () => {
 /** Owns the global theme and the shared motion physics used by the product. */
 export function ExperienceProvider({ children }) {
   const [theme, setTheme] = useState(getInitialTheme)
+  const [integrityTone, setIntegrityTone] = useState('secure')
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
@@ -22,8 +23,10 @@ export function ExperienceProvider({ children }) {
   const value = useMemo(() => ({
     theme,
     setTheme,
+    integrityTone,
+    setIntegrityTone,
     toggleTheme: () => setTheme(current => current === 'dark' ? 'light' : 'dark'),
-  }), [theme])
+  }), [theme, integrityTone])
 
   return (
     <ThemeContext.Provider value={value}>
@@ -38,4 +41,9 @@ export function useTheme() {
   const context = useContext(ThemeContext)
   if (!context) throw new Error('useTheme must be used within ExperienceProvider')
   return context
+}
+
+export function useIntegrityTone() {
+  const { integrityTone, setIntegrityTone } = useTheme()
+  return { integrityTone, setIntegrityTone }
 }

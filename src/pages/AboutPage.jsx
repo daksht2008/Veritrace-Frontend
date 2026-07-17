@@ -56,10 +56,10 @@ export default function AboutPage() {
             <span className="font-extrabold text-lg uppercase tracking-widest gradient-arb">VeriTrace</span>
           </div>
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-4xl md:text-5xl font-extrabold leading-tight mb-4 text-[var(--text)]">
-            How VeriTrace <span className="gradient-arb">Works</span>
+            Proof, not promises.
           </motion.h1>
           <p className="text-base text-[var(--text-2)] max-w-2xl mx-auto leading-relaxed mb-8">
-            Blockchain-backed content provenance using multi-modal fingerprinting — SHA-256, perceptual hashes, semantic vectors, ArcFace biometrics, and wav2vec2 voice prints.
+            VeriTrace combines cryptographic proof with perceptual intelligence, making ownership and authenticity verifiable even after content changes hands.
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Link to="/register"><Button variant="primary" size="lg"><FilePlus size={18} /> Register Content</Button></Link>
@@ -70,8 +70,8 @@ export default function AboutPage() {
 
       {/* ARCHITECTURE */}
       <section className="max-w-[1280px] mx-auto px-5 py-16">
-        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">System Architecture</h2>
-        <p className="text-center text-sm text-[var(--text-3)] mb-10">Five layers working together to protect your content</p>
+        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Built to preserve context.</h2>
+        <p className="text-center text-sm text-[var(--text-3)] mb-10">Five purpose-built layers convert an upload into an enduring, verifiable proof.</p>
         <div className="flex items-stretch justify-center gap-0 flex-wrap overflow-x-auto">
           {[
             { icon: Cpu, label: 'Hash Engine', sub: 'Port 8081', color: '#12AAFF' },
@@ -114,8 +114,8 @@ export default function AboutPage() {
 
       {/* HASH TYPES */}
       <section className="max-w-[1280px] mx-auto px-5 pb-16">
-        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Fingerprint Types</h2>
-        <p className="text-center text-sm text-[var(--text-3)] mb-10">Multi-modal hashing catches everything from exact copies to AI deepfakes</p>
+        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Evidence that survives change.</h2>
+        <p className="text-center text-sm text-[var(--text-3)] mb-10">Each signal catches a different kind of transformation—from exact duplicates to sophisticated synthetic edits.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {HASH_TYPES.map((h, i) => (
             <motion.div key={h.tag} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
@@ -138,8 +138,8 @@ export default function AboutPage() {
 
       {/* FAQ */}
       <section className="max-w-[760px] mx-auto px-5 pb-16">
-        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Frequently Asked Questions</h2>
-        <p className="text-center text-sm text-[var(--text-3)] mb-8">Everything you need to know about VeriTrace</p>
+        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Questions, answered clearly.</h2>
+        <p className="text-center text-sm text-[var(--text-3)] mb-8">The practical details behind VeriTrace, from storage to verification thresholds.</p>
         <Accordion type="single" collapsible className="w-full">
           {FAQ.map((f, i) => <FaqItem key={i} {...f} i={i} />)}
         </Accordion>
@@ -148,8 +148,8 @@ export default function AboutPage() {
       {/* CTA */}
       <AuroraBackground className="py-16 text-center">
         <div className="max-w-[1280px] mx-auto px-5">
-          <h2 className="text-3xl font-extrabold mb-3 text-[var(--text)]">Ready to protect your content?</h2>
-          <p className="text-sm text-[var(--text-2)] mb-8">Join the VeriTrace registry and secure your creative work on the blockchain.</p>
+          <h2 className="text-3xl font-extrabold mb-3 text-[var(--text)]">Your work deserves durable proof.</h2>
+          <p className="text-sm text-[var(--text-2)] mb-8">Create an ownership record today, then verify it anywhere tomorrow.</p>
           <div className="flex gap-3 justify-center flex-wrap">
             <Link to="/register"><Button variant="primary" size="lg"><FilePlus size={18} /> Get Started</Button></Link>
             <Link to="/verify"><Button variant="outline" size="lg"><Search size={18} /> Verify Content</Button></Link>

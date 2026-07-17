@@ -16,6 +16,7 @@ import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
 import PageHero from '../components/PageHero'
 import { useUpload } from '../context/UploadContext'
+import { useIntegrityTone } from '../components/providers/ExperienceProvider'
 import { config } from '../wagmiConfig'
 import {
   HASH_ENGINE_API, CONTRACT_ADDRESS, CONTRACT_ABI, ARBITRUM_SEPOLIA, CORE_BACKEND_API,
@@ -33,6 +34,7 @@ export default function VerifyPage() {
     verBlockchainRecord: blockchainRecord, setVerBlockchainRecord: setBlockchainRecord,
     verDbResults: dbResults, setVerDbResults: setDbResults,
   } = useUpload()
+  const { setIntegrityTone } = useIntegrityTone()
 
   const [inputType, setInputType] = useState('media')
   const [textContent, setTextContent] = useState('')
@@ -49,6 +51,12 @@ export default function VerifyPage() {
       }
     }
   }, [textContent, inputType, setFile])
+
+  useEffect(() => {
+    const hasIntegrityAlert = error || dbResults?.some(result => result.isDeepfake || result.matchType === 'deepfake')
+    setIntegrityTone(hasIntegrityAlert ? 'alert' : 'secure')
+    return () => setIntegrityTone('secure')
+  }, [error, dbResults, setIntegrityTone])
 
   const computeLocalSHA256 = async (f) => {
     const arrayBuffer = await f.arrayBuffer()
@@ -134,7 +142,7 @@ export default function VerifyPage() {
 
   return (
     <section>
-      <PageHero eyebrow="AUTHENTICITY INTELLIGENCE" title="Know what you’re looking at." description="Test a file against on-chain records, visual fingerprints, and similarity signals to identify originals, derivatives, and suspicious edits." icon={Search} />
+      <PageHero eyebrow="AUTHENTICITY INTELLIGENCE" title="See the evidence behind a file." description="Compare content against public records and layered similarity signals to identify originals, likely derivatives, and high-risk alterations." icon={Search} />
       <div className="max-w-[1280px] mx-auto px-5 pt-7">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-5">
         {/* LEFT */}
@@ -143,7 +151,7 @@ export default function VerifyPage() {
             <Card className="card-hover-glow">
               <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                  <span className="flex items-center gap-2"><Search size={16} className="text-[#12AAFF]" /> Verify Content</span>
+                  <span className="flex items-center gap-2"><Search size={16} className="text-[#12AAFF]" /> Forensic intake</span>
                 </CardTitle>
               </CardHeader>
               <CardBody className="flex flex-col gap-4">
@@ -154,13 +162,13 @@ export default function VerifyPage() {
                   </TabsList>
                   
                   <TabsContent value="media">
-                    <FileUpload onFileSelected={handleFileSelected} label="Drop a file to check against the VeriTrace registry" />
+                    <FileUpload onFileSelected={handleFileSelected} label="Drop a file to inspect its provenance" />
                   </TabsContent>
                   
                   <TabsContent value="text" className="flex flex-col gap-2 mt-0">
                     <textarea className="w-full h-32 p-3 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl text-sm focus:border-[#12AAFF] focus:outline-none resize-none" placeholder="Paste your article or text content here to check it against the registry..." value={textContent} onChange={(e) => setTextContent(e.target.value)} />
                     <div className="text-[10px] text-[var(--text-3)] text-right">{textContent.length} characters</div>
-                    <Button onClick={() => handleFileSelected(file)} disabled={!textContent.trim()}>Check Registry</Button>
+                    <Button onClick={() => handleFileSelected(file)} disabled={!textContent.trim()}>Run provenance check</Button>
                   </TabsContent>
                 </Tabs>
               </CardBody>
@@ -171,7 +179,7 @@ export default function VerifyPage() {
             {(localSha256 || loading) && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
                 <Card className="card-hover-glow">
-                  <CardHeader><CardTitle>Computed Fingerprints</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>Evidence extracted</CardTitle></CardHeader>
                   <CardBody className="flex flex-col gap-3">
                     {loading && !localSha256 ? <div className="skeleton h-9 rounded-lg w-full" /> : (
                       <>
@@ -186,9 +194,9 @@ export default function VerifyPage() {
           </AnimatePresence>
 
           <Card className="card-hover-glow">
-            <CardHeader><CardTitle><Info size={16} className="text-[#12AAFF]" /> Understanding Results</CardTitle></CardHeader>
+            <CardHeader><CardTitle><Info size={16} className="text-[#12AAFF]" /> Read the evidence</CardTitle></CardHeader>
             <CardBody className="text-xs flex flex-col gap-2.5">
-              <div className="flex items-start gap-3"><Badge variant="success" className="flex-shrink-0 mt-0.5">100%</Badge><div><strong className="text-[var(--text)]">Exact Match</strong> — Cryptographic hashes are identical. Byte-for-byte match with the registered original.</div></div>
+              <div className="flex items-start gap-3"><Badge variant="success" className="flex-shrink-0 mt-0.5">100%</Badge><div><strong className="text-[var(--text)]">Exact match</strong> — The cryptographic fingerprints are identical: this is the registered file, byte for byte.</div></div>
               <div className="flex items-start gap-3"><Badge variant="warning" className="flex-shrink-0 mt-0.5">80-99%</Badge><div><strong className="text-[var(--text)]">Similar Content</strong> — Perceptual signatures match closely. May be compressed, resized, or cropped.</div></div>
               <div className="flex items-start gap-3"><Badge variant="default" className="flex-shrink-0 mt-0.5">&lt;80%</Badge><div><strong className="text-[var(--text)]">No Match</strong> — No entries found within visual or cryptographic thresholds.</div></div>
             </CardBody>
@@ -202,8 +210,8 @@ export default function VerifyPage() {
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
                 <Card className={`card-hover-glow ${blockchainRecord ? 'border-[var(--success-border)]' : ''}`}>
                   <CardHeader className={blockchainRecord ? 'bg-[var(--success-bg)]' : ''}>
-                    <CardTitle className={blockchainRecord ? 'text-[#00D395]' : ''}><Shield size={16} /> On-Chain Smart Contract Proof</CardTitle>
-                    {blockchainRecord && <Badge variant="success">Verified Original</Badge>}
+                    <CardTitle className={blockchainRecord ? 'text-[#00D395]' : ''}><Shield size={16} /> Immutable registry record</CardTitle>
+                    {blockchainRecord && <Badge variant="success">Proof located</Badge>}
                   </CardHeader>
                   <CardBody>
                     {loading && !blockchainRecord ? (

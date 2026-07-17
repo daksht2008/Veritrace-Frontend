@@ -73,7 +73,7 @@ export default function LibraryPage() {
 
   return (
     <section>
-      <PageHero eyebrow="PUBLIC PROVENANCE LEDGER" title="Explore the registry." description="A living, transparent record of media and text registrations, read directly from the Arbitrum Sepolia event log." icon={LibraryIcon} />
+      <PageHero eyebrow="PUBLIC PROVENANCE LEDGER" title="Explore the evidence." description="A transparent, independently auditable record of every media and text proof written to the Arbitrum Sepolia registry." icon={LibraryIcon} />
       <div className="max-w-[1280px] mx-auto px-5 pt-7">
 
       {error && <div className="mb-5"><Alert variant="danger">{error}</Alert></div>}
@@ -82,7 +82,7 @@ export default function LibraryPage() {
         <Card className="card-hover-glow card-border-animate">
           <CardHeader>
             <CardTitle>
-              <span className="flex items-center gap-2"><LibraryIcon size={16} className="text-[#12AAFF]" /> Registered Assets ({registrations.length})</span>
+              <span className="flex items-center gap-2"><LibraryIcon size={16} className="text-[#12AAFF]" /> Evidence ledger <span className="text-[var(--text-4)]">({registrations.length})</span></span>
             </CardTitle>
             <Badge variant="arb"><ArbitrumLogo size={12} /> Arbitrum Sepolia</Badge>
           </CardHeader>
@@ -97,8 +97,8 @@ export default function LibraryPage() {
                   <ArbitrumLogo size={28} animated />
                 </div>
               </div>
-              <div className="text-lg font-bold text-[var(--text)] mb-1.5">Reading blockchain event log...</div>
-              <div className="text-sm text-[var(--text-3)] mb-5">Querying Arbitrum Sepolia contract filters</div>
+              <div className="text-lg font-bold text-[var(--text)] mb-1.5">Synchronizing registry evidence…</div>
+              <div className="text-sm text-[var(--text-3)] mb-5">Reading verified ContentRegistered events from Arbitrum Sepolia</div>
               {/* Skeleton table rows */}
               <div className="w-full max-w-3xl flex flex-col gap-2">
                 {[0,1,2,3,4].map(i => (
@@ -107,13 +107,13 @@ export default function LibraryPage() {
               </div>
             </div>
           ) : registrations.length === 0 ? (
-            <EmptyState icon={<LibraryIcon size={28} />} title="No assets registered yet" description="Go to the Register tab to write the first cryptographic fingerprint to the contract!" />
+            <EmptyState icon={<LibraryIcon size={28} />} title="The registry is waiting for its first proof" description="Register an original to create the first public, cryptographically verifiable record." />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full vt-table">
                 <thead>
                   <tr>
-                    {['Cryptographic SHA-256', 'Visual pHash', 'Registrant Owner', 'AI Model', 'Date Anchored', 'Actions'].map((h, i) => (
+                    {['Evidence fingerprint', 'Visual signature', 'Registrant', 'Declared source', 'Block timestamp', 'Inspect'].map((h, i) => (
                       <th key={h} className={i === 5 ? 'text-right' : ''}>{h}</th>
                     ))}
                   </tr>

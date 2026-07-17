@@ -192,7 +192,7 @@ export default function RegisterPage() {
 
   return (
     <section>
-      <PageHero eyebrow="CREATE AN IMMUTABLE RECORD" title="Register your original work." description="Create a durable provenance trail for media and text. Your fingerprints are anchored to Arbitrum, while your work stays identifiable everywhere it travels." icon={FilePlus} />
+      <PageHero eyebrow="CREATE AN IMMUTABLE RECORD" title="Make ownership undeniable." description="Generate a durable proof for media or text, then anchor the evidence to Arbitrum. Your original stays identifiable wherever it goes." icon={FilePlus} />
       <div className="max-w-[1280px] mx-auto px-5 pt-7">
       <StepIndicator steps={['Upload File', 'Generate Hashes', 'Sign & Register', 'Confirmed']} currentStep={step} />
 
@@ -213,7 +213,7 @@ export default function RegisterPage() {
                   </TabsList>
                   
                   <TabsContent value="media">
-                    <FileUpload onFileSelected={handleFileSelected} label="Drop your file here to prepare for registry" />
+                    <FileUpload onFileSelected={handleFileSelected} label="Drop an original to begin its proof" />
                   </TabsContent>
                   
                   <TabsContent value="text" className="flex flex-col gap-2 mt-0">
@@ -294,7 +294,7 @@ export default function RegisterPage() {
                 <AnimatePresence mode="wait">
                   {step < 2 && !processing && (
                     <motion.div key="waiting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <Alert variant="info">Upload a file first. We'll compute its SHA-256 fingerprint via the hash engine, then you can register it on Arbitrum Sepolia.</Alert>
+                      <Alert variant="info">Start with an original. We’ll generate its fingerprints locally, then prepare an immutable Arbitrum registration.</Alert>
                     </motion.div>
                   )}
 
@@ -324,7 +324,7 @@ export default function RegisterPage() {
 
                   {step === 2 && !processing && (
                     <motion.div key="ready" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
-                      <Alert variant="success">Fingerprints computed. Click below to sign a transaction and register on-chain.</Alert>
+                      <Alert variant="success">Evidence is ready. Review the record, then sign once to publish your proof on-chain.</Alert>
 
                       <div>
                         <label className="text-xs font-semibold text-[var(--text-3)] block mb-1.5 flex items-center gap-1"><Bot size={12} /> AI Generator Attribution</label>
@@ -403,7 +403,7 @@ export default function RegisterPage() {
           </SpotlightCard>
 
           <Card className="card-hover-glow">
-            <CardHeader><CardTitle>What gets stored?</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Where your proof lives</CardTitle></CardHeader>
             <CardBody className="text-xs leading-relaxed text-[var(--text-2)]">
               <div className="flex flex-col gap-3">
                 <InfoRow label="On-Chain" color="#12AAFF" items={['SHA-256 hash (bytes32)', 'Wallet address (msg.sender)', 'Block timestamp', 'AI tool attribution']} />
