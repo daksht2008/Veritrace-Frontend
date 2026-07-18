@@ -9,7 +9,6 @@
  *  - FAQ
  */
 import { Link } from 'react-router-dom'
-import { LogoIcon } from '../components/Navbar'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 

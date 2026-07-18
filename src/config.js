@@ -26,6 +26,13 @@ export const HASH_ENGINE_API = 'https://api.hash.veritrace.dpkvtrading.online';
  */
 export const CORE_BACKEND_API = 'https://api.veritrace.dpkvtrading.online';
 
+/**
+ * RAG Help Bot API — Orchestrator API for natural language assistance,
+ * query resolution, on-chain lookup, and team notifications.
+ * Endpoint: POST /chat
+ */
+export const RAG_BOT_API = import.meta.env.VITE_RAG_BOT_API || 'https://veritrace-bot.onrender.com';
+
 // ─────────────────────────────────────────────────────────────
 // Smart Contract (Arbitrum Sepolia)
 // ─────────────────────────────────────────────────────────────

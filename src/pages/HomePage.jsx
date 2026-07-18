@@ -283,11 +283,6 @@ function StepItem({ number, title, description }) {
     </div>
   )
 }
-      <FileText size={14} className="format-preview-icon" />
-      <div className="format-document-seal" />
-    </div >
-  )
-}
 
 function StatItem({ icon, color, label, value, suffix, border }) {
   return (

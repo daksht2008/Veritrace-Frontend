@@ -7,6 +7,7 @@ import LibraryPage from './pages/LibraryPage'
 import AboutPage from './pages/AboutPage'
 import { Toaster } from './components/ui/sonner'
 import AppShell from './components/AppShell'
+import ChatWidget from './components/ChatWidget'
 
 // Page wrapper for transitions
 function PageWrapper({ children }) {
@@ -40,6 +41,7 @@ function App() {
           </Routes>
         </AnimatePresence>
       </AppShell>
+      <ChatWidget />
       <Toaster />
     </>
   )
