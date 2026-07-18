@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage'
 import VerifyPage from './pages/VerifyPage'
 import LibraryPage from './pages/LibraryPage'
 import AboutPage from './pages/AboutPage'
+import ProfilePage from './pages/ProfilePage'
 import { Toaster } from './components/ui/sonner'
 import AppShell from './components/AppShell'
 import ChatWidget from './components/ChatWidget'
@@ -37,6 +38,7 @@ function App() {
             <Route path="/verify" element={<PageWrapper><VerifyPage /></PageWrapper>} />
             <Route path="/library" element={<PageWrapper><LibraryPage /></PageWrapper>} />
             <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
+            <Route path="/profile" element={<PageWrapper><ProfilePage /></PageWrapper>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AnimatePresence>

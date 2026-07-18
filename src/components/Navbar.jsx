@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
-import { FilePlus, Search, Library, Info, Menu, X, ChevronDown, Wallet, Sun, Moon, Copy, LogOut, Check } from 'lucide-react'
+import { FilePlus, Search, Library, Info, Menu, X, ChevronDown, Wallet, Sun, Moon, Copy, LogOut, Check, User } from 'lucide-react'
 import { toast } from 'sonner'
 import { ARBITRUM_SEPOLIA } from '../config'
 import { VeriTraceLogo, ArbitrumLogo } from './ArbitrumLogo'
@@ -16,6 +16,7 @@ const navItems = [
   { path: '/verify', label: 'Verify', icon: Search },
   { path: '/library', label: 'Library', icon: Library },
   { path: '/about', label: 'About', icon: Info },
+  { path: '/profile', label: 'Profile', icon: User },
 ]
 
 export default function Navbar() {
@@ -205,7 +206,14 @@ function WalletButton() {
                   <div className="text-[10px] uppercase tracking-[.14em] font-bold text-[var(--text-4)]">Connected wallet</div>
                   <div className="font-mono text-xs text-[var(--text)] mt-1 break-all">{address}</div>
                 </div>
-                <button onClick={copyAddress} className="w-full mt-1.5 flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--bg-2)] active:scale-[.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF]">
+                <Link
+                  to="/profile"
+                  onClick={() => setShowDropdown(false)}
+                  className="w-full mt-1.5 flex items-center gap-2 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--bg-2)] active:scale-[.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF]"
+                >
+                  <User size={15} /> View profile
+                </Link>
+                <button onClick={copyAddress} className="w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-left text-sm font-medium text-[var(--text-2)] hover:text-[var(--text)] hover:bg-[var(--bg-2)] active:scale-[.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF]">
                   <span className="flex items-center gap-2"><Copy size={15} /> Copy address</span>
                   {copied ? <Check size={15} className="text-[#00D395]" /> : <span className="text-[10px] font-mono text-[var(--text-4)]">{formatAddress(address)}</span>}
                 </button>
