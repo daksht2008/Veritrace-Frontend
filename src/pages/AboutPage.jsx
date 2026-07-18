@@ -36,7 +36,7 @@ const HASH_TYPES = [
 
 const FAQ = [
   { q: 'Does VeriTrace store my original file?', a: 'Yes — your file is pinned to IPFS (permanent, content-addressed) and backed up to S3. Only the fingerprint hashes are written on-chain; the file itself lives off-chain.' },
-  { q: 'What blockchain does VeriTrace use?', a: 'Arbitrum Sepolia (testnet). The registry smart contract is deployed at 0x468edc5b2fe9d1c919f2377cbe0ccb16f32ead29 and uses the Stylus VM for gas efficiency.' },
+  { q: 'What blockchain does VeriTrace use?', a: 'Arbitrum Sepolia (testnet). The registry smart contract is deployed at 0xd5a4e9185cbcea881f2c76b07732335250537820 and uses the Stylus VM for gas efficiency.' },
   { q: 'Can I detect AI-generated content?', a: 'Yes. The hash engine computes an AI confidence score. If it exceeds 75%, you must declare the AI model used during registration. Undeclared AI content is flagged.' },
   { q: 'What is the fuzzy match threshold?', a: 'A pHash Hamming distance ≤ 22 out of 64 bits is considered a match. For semantic vectors, cosine similarity ≥ 0.85 triggers a match. Face embeddings use a 0.6 cosine threshold.' },
   { q: 'Is the verification free?', a: 'Verification (exact, fuzzy, segmented) is free — it only hits the Go backend API. Only registration requires a gas-paid blockchain transaction.' },

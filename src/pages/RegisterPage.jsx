@@ -153,14 +153,14 @@ export default function RegisterPage() {
       try {
         const feeProvider = new ethers.JsonRpcProvider(ARBITRUM_SEPOLIA.rpcUrl)
         const feeData = await feeProvider.getFeeData()
-        const mult = 200n
+        const mult = 1000n
         safeMaxFee = feeData.maxFeePerGas ? (feeData.maxFeePerGas * mult) / 100n : undefined
         safePriorityFee = feeData.maxPriorityFeePerGas ? (feeData.maxPriorityFeePerGas * mult) / 100n : undefined
       } catch {}
       const txHash = await writeContractAsync({
         chainId: ARBITRUM_SEPOLIA.chainId, address: CONTRACT_ADDRESS,
         abi: parseAbi(CONTRACT_ABI), functionName: 'registerContent',
-        args: [sha256Bytes32, hashes.phash ? BigInt(hashes.phash) : 0n, ipfsCid || '', aiTool || ''],
+        args: [sha256Bytes32, hashes.phash ? BigInt(hashes.phash) : 0n, ipfsCid || '', aiTool || '', allowAiTraining],
         ...(safeMaxFee || safePriorityFee ? { maxFeePerGas: safeMaxFee, maxPriorityFeePerGas: safePriorityFee } : {}),
       })
       const receipt = await waitForTransactionReceipt(config, { hash: txHash })
@@ -360,10 +360,11 @@ export default function RegisterPage() {
                         <div className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-3)] mb-2 flex items-center gap-1.5"><ArbitrumLogo size={12} /> Transaction Preview</div>
                         <div className="flex flex-col gap-1.5 text-xs">
                           <TxRow label="Contract" value="VeriTraceRegistry" accent />
-                          <TxRow label="Method" value="registerContent(bytes32, uint64, string, string)" />
+                          <TxRow label="Method" value="registerContent(bytes32, uint64, string, string, bool)" />
                           <TxRow label="SHA-256" value={`0x${hashes.sha256?.slice(0, 12)}...`} mono />
                           <TxRow label="Network" value="Arbitrum Sepolia" />
                           <TxRow label="AI Tool" value={aiTool || '(none)'} />
+                          <TxRow label="Allow AI" value={allowAiTraining ? 'Yes' : 'No'} />
                         </div>
                       </div>
 
