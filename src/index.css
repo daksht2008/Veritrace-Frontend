@@ -191,7 +191,7 @@ body {
 }
 
 /* Persistent site atmosphere — kept below interactive content. */
-.site-content, nav, footer { position: relative; }
+.site-content, footer { position: relative; }
 .site-content { z-index: 1; }
 .ambient-background {
   position: fixed;

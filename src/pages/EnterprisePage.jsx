@@ -35,6 +35,7 @@ export default function EnterprisePage() {
   const [purchasing, setPurchasing] = useState(false)
   const [purchaseSuccess, setPurchaseSuccess] = useState(false)
   const [txHash, setTxHash] = useState('')
+  const [unlockedLinks, setUnlockedLinks] = useState([])
   const [error, setError] = useState(null)
 
   const handleQuery = async () => {
@@ -126,8 +127,26 @@ export default function EnterprisePage() {
       const receipt = await waitForTransactionReceipt(config, { hash })
       
       setTxHash(receipt.transactionHash)
+      
+      // 3. Unlock S3 URLs from backend
+      toast.info('Transaction confirmed! Unlocking high-res S3 links...')
+      const unlockRes = await fetch(`${CORE_BACKEND_API}/api/v1/enterprise/unlock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          txHash: receipt.transactionHash,
+          hashes: datasetData.hashes,
+        })
+      })
+      const unlockData = await unlockRes.json()
+      
+      if (!unlockRes.ok) {
+        throw new Error(unlockData.error || 'Failed to unlock S3 links')
+      }
+      
+      setUnlockedLinks(unlockData.links || [])
       setPurchaseSuccess(true)
-      toast.success('Successfully purchased dataset access!')
+      toast.success('Successfully purchased and unlocked dataset!')
     } catch (err) {
       let message = err.message
       if (message.includes('user rejected') || message.includes('User rejected')) message = 'Transaction was rejected in your wallet.'
@@ -281,10 +300,27 @@ export default function EnterprisePage() {
                           </div>
                         </div>
 
-                        <Button variant="primary" size="lg" className="w-full mb-3">
-                          <Download size={18} className="mr-2" /> Download Pre-Signed S3 URLs
+                        <Button 
+                          variant="primary" 
+                          size="lg" 
+                          className="w-full mb-3"
+                          onClick={() => {
+                            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(unlockedLinks, null, 2));
+                            const downloadAnchorNode = document.createElement('a');
+                            downloadAnchorNode.setAttribute("href", dataStr);
+                            downloadAnchorNode.setAttribute("download", "unlocked_dataset.json");
+                            document.body.appendChild(downloadAnchorNode);
+                            downloadAnchorNode.click();
+                            downloadAnchorNode.remove();
+                          }}
+                        >
+                          <Download size={18} className="mr-2" /> Download Unlocked S3 URLs ({unlockedLinks.length})
                         </Button>
-                        <Button variant="outline" size="sm" className="w-full" onClick={() => setPurchaseSuccess(false)}>
+                        <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                          setPurchaseSuccess(false)
+                          setDatasetData(null)
+                          setUnlockedLinks([])
+                        }}>
                           Query New Dataset
                         </Button>
                       </motion.div>
