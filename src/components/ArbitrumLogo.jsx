@@ -20,23 +20,47 @@ export function ArbitrumLogo({ size = 24, className, animated = false }) {
 /** VeriTraceLogo — shield with checkmark */
 export function VeriTraceLogo({ size = 32, className }) {
   return (
-    <div className={`flex items-center gap-2 ${className || ''}`}>
-      <div className="relative">
-        <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
-          <defs>
-            <linearGradient id="vt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#12AAFF" />
-              <stop offset="100%" stopColor="#1B4ADD" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M16 2L28 7V17C28 23.5 22.5 28.5 16 30C9.5 28.5 4 23.5 4 17V7L16 2Z"
-            fill="url(#vt-grad)"
-            style={{ filter: 'drop-shadow(0 2px 8px rgba(18,170,255,0.3))' }}
-          />
-          <path d="M10 16L14.5 20.5L22 13" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
+    <div className={`flex items-center justify-center ${className || ''}`}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 100 100"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ filter: 'drop-shadow(0 2px 10px rgba(18,170,255,0.22))' }}
+      >
+        <defs>
+          <linearGradient id="vt-logo-grad" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#58d5ff" />
+            <stop offset="50%" stopColor="#12AAFF" />
+            <stop offset="100%" stopColor="#1b4add" />
+          </linearGradient>
+        </defs>
+
+        {/* Left Leg (White / CurrentColor) */}
+        <path
+          d="M26 26.5 H40 L47.5 56.5 H33.5 Z"
+          fill="currentColor"
+        />
+
+        {/* Right Leg / Checkmark (Blue Gradient) */}
+        <path
+          d="M38 42 H45 L48 54 L73 26.5 H61.5 L48 47.5 L38 42 Z"
+          fill="url(#vt-logo-grad)"
+        />
+
+        {/* Floating Digital Pixel Dispersion */}
+        <rect x="66" y="24" width="3" height="3" fill="#58d5ff" />
+        <rect x="70" y="21" width="3" height="3" fill="#12AAFF" />
+        <rect x="74" y="25" width="2" height="2" fill="#58d5ff" />
+        <rect x="64" y="20" width="2" height="2" fill="#1B4ADD" opacity="0.8" />
+        <rect x="72" y="18" width="2.5" height="2.5" fill="#58d5ff" />
+        <rect x="67" y="28" width="2" height="2" fill="#12AAFF" />
+        <rect x="76" y="21" width="2" height="2" fill="#58d5ff" />
+        <rect x="69" y="16" width="1.5" height="1.5" fill="#12AAFF" />
+        <rect x="71" y="25" width="1.8" height="1.8" fill="#1B4ADD" />
+        <rect x="65" y="25" width="2" height="2" fill="#12AAFF" />
+      </svg>
     </div>
   )
 }
