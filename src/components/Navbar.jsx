@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from 'wagmi'
-import { FilePlus, Search, Library, Info, Menu, X, ChevronDown, Wallet, Sun, Moon, Copy, LogOut, Check, User } from 'lucide-react'
+import { FilePlus, Search, Library, Info, Menu, X, ChevronDown, Wallet, Sun, Moon, Copy, LogOut, Check, User, Database } from 'lucide-react'
 import { toast } from 'sonner'
 import { ARBITRUM_SEPOLIA } from '../config'
 import { VeriTraceLogo, ArbitrumLogo } from './ArbitrumLogo'
@@ -17,6 +17,7 @@ const navItems = [
   { path: '/library', label: 'Library', icon: Library },
   { path: '/about', label: 'About', icon: Info },
   { path: '/profile', label: 'Profile', icon: User },
+  { path: '/enterprise', label: 'Enterprise', icon: Database },
 ]
 
 export default function Navbar() {
