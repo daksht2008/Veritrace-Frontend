@@ -182,14 +182,14 @@ function WalletButton() {
       <div className="relative">
         <button
           onClick={() => setShowDropdown(value => !value)}
-          className="wallet-account-trigger flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-xl active:scale-[.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF]"
+          className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-xl bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] shadow-sm hover:border-[#12AAFF]/50 hover:shadow-md active:scale-[.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#12AAFF]"
           aria-expanded={showDropdown}
           aria-label="Open wallet account menu"
         >
-          <span className="live-dot" />
-          <span className="font-mono text-xs hidden sm:inline">{formatAddress(address)}</span>
+          <span className="w-2 h-2 rounded-full bg-[#00D395] shadow-[0_0_8px_#00D395]" />
+          <span className="font-mono font-medium text-[var(--text)] hidden sm:inline">{formatAddress(address)}</span>
           <ArbitrumLogo size={14} />
-          <ChevronDown size={12} className={cn('transition-transform', showDropdown && 'rotate-180')} />
+          <ChevronDown size={12} className={cn('transition-transform text-[var(--text-3)]', showDropdown && 'rotate-180')} />
         </button>
 
         <AnimatePresence>

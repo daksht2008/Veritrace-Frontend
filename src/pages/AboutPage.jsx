@@ -8,6 +8,7 @@ import { AuroraBackground } from '../components/aceternity/AuroraBackground'
 import { ParticleField } from '../components/aceternity/ParticleField'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { BeamLine } from '../components/aceternity/BeamLine'
+import { InfiniteMovingCards } from '../components/aceternity/InfiniteMovingCards'
 import { FilePlus, Search, FingerprintPattern as Fingerprint, Shield, Database, Server, Cpu, Bot, ArrowRight, ChevronDown, Upload, Pin, Check, Layers, Zap, Eye, TriangleAlert as AlertTriangle } from 'lucide-react'
 
 const REGISTER_STEPS = [
@@ -92,48 +93,53 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* HOW TO REGISTER & VERIFY */}
-      <section className="max-w-[1280px] mx-auto px-5 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div>
-            <div className="flex items-center gap-2.5 mb-5">
-              <span className="bg-[var(--arb-bg)] text-[#12AAFF] rounded-xl p-2"><FilePlus size={20} /></span>
-              <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Register</h2>
-            </div>
-            <div className="flex flex-col gap-3">{REGISTER_STEPS.map((s, i) => <StepCard key={s.num} {...s} delay={i * 0.05} />)}</div>
+      {/* HOW TO REGISTER & VERIFY STACKED FULL-WIDTH CAROUSELS */}
+      <section className="max-w-[1280px] mx-auto px-5 pb-16 space-y-10">
+        <div>
+          <div className="flex items-center gap-2.5 mb-4 px-2">
+            <span className="bg-[var(--arb-bg)] text-[#12AAFF] rounded-xl p-2"><FilePlus size={20} /></span>
+            <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Register</h2>
           </div>
-          <div>
-            <div className="flex items-center gap-2.5 mb-5">
-              <span className="bg-[var(--success-bg)] text-[#00D395] rounded-xl p-2"><Search size={20} /></span>
-              <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Verify</h2>
+          <InfiniteMovingCards items={REGISTER_STEPS} speed="normal" direction="left" renderItem={(s) => (
+            <div className="w-[320px] sm:w-[360px]">
+              <StepCard {...s} delay={0} />
             </div>
-            <div className="flex flex-col gap-3">{VERIFY_STEPS.map((s, i) => <StepCard key={s.num} {...s} delay={i * 0.05} />)}</div>
+          )} />
+        </div>
+
+        <div>
+          <div className="flex items-center gap-2.5 mb-4 px-2">
+            <span className="bg-[var(--success-bg)] text-[#00D395] rounded-xl p-2"><Search size={20} /></span>
+            <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Verify</h2>
           </div>
+          <InfiniteMovingCards items={VERIFY_STEPS} speed="normal" direction="left" renderItem={(s) => (
+            <div className="w-[320px] sm:w-[360px]">
+              <StepCard {...s} delay={0} />
+            </div>
+          )} />
         </div>
       </section>
 
-      {/* HASH TYPES */}
+      {/* HASH TYPES INFINITE CAROUSEL */}
       <section className="max-w-[1280px] mx-auto px-5 pb-16">
         <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Evidence that survives change.</h2>
-        <p className="text-center text-sm text-[var(--text-3)] mb-10">Each signal catches a different kind of transformation—from exact duplicates to sophisticated synthetic edits.</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {HASH_TYPES.map((h, i) => (
-            <motion.div key={h.tag} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
-              <SpotlightCard className="h-full">
-                <Card hover className="h-full card-hover-glow">
-                  <CardBody className="p-5 flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${h.color}15`, color: h.color }}>{h.tag}</span>
-                      <span className="font-bold text-sm text-[var(--text)]">{h.title}</span>
-                    </div>
-                    <p className="text-xs text-[var(--text-3)] leading-relaxed m-0">{h.desc}</p>
-                    <div className="text-[11px] rounded px-2 py-1" style={{ background: `${h.color}10`, color: h.color }}>Use cases: {h.use}</div>
-                  </CardBody>
-                </Card>
-              </SpotlightCard>
-            </motion.div>
-          ))}
-        </div>
+        <p className="text-center text-sm text-[var(--text-3)] mb-8">Each signal catches a different kind of transformation—from exact duplicates to sophisticated synthetic edits.</p>
+        <InfiniteMovingCards items={HASH_TYPES} speed="normal" direction="left" renderItem={(h) => (
+          <div className="w-[320px] sm:w-[360px] h-full">
+            <SpotlightCard className="h-full">
+              <Card hover className="h-full card-hover-glow">
+                <CardBody className="p-5 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${h.color}15`, color: h.color }}>{h.tag}</span>
+                    <span className="font-bold text-sm text-[var(--text)]">{h.title}</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-3)] leading-relaxed m-0">{h.desc}</p>
+                  <div className="text-[11px] rounded px-2 py-1" style={{ background: `${h.color}10`, color: h.color }}>Use cases: {h.use}</div>
+                </CardBody>
+              </Card>
+            </SpotlightCard>
+          </div>
+        )} />
       </section>
 
       {/* FAQ */}

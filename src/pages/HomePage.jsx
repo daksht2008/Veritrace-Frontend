@@ -365,7 +365,7 @@ function WorkflowConnector({ reverse }) {
       <div className="w-full relative flex items-center">
         {/* Dashed line background */}
         <div className="w-full h-0 border-t-2 border-dashed border-[var(--border)]" />
-        
+
         {/* Animated arrow container */}
         <motion.div
           className="absolute top-1/2 -translate-y-1/2 text-[#12AAFF]"
