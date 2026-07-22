@@ -134,24 +134,6 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
-
-/* ─── 32x32 Custom CSS Cursors for Light & Dark Modes ─── */
-html, body {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path d='M3 3L13 27L17.5 17.5L27 13L3 3Z' fill='%230f172a' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/><path d='M6 7L13 21L15.5 15.5L21 13L6 7Z' fill='%2338bdf8' opacity='0.95'/></svg>") 3 3, auto;
-}
-
-a, button, [role="button"], input, select, textarea, label, .card-hover-glow, .wallet-account-trigger, .spotlight {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path d='M2 2L12 26L16.5 16.5L26 12L2 2Z' fill='%232563eb' stroke='%23ffffff' stroke-width='1.5' stroke-linejoin='round'/><circle cx='21' cy='21' r='5.5' fill='%23ffffff' stroke='%230f172a' stroke-width='1.5'/><circle cx='21' cy='21' r='2' fill='%230ea5e9'/></svg>") 2 2, pointer;
-}
-
-[data-theme="dark"], [data-theme="dark"] body {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path d='M3 3L13 27L17.5 17.5L27 13L3 3Z' fill='%2312AAFF' stroke='%23000000' stroke-width='1.5' stroke-linejoin='round'/><path d='M6 7L13 21L15.5 15.5L21 13L6 7Z' fill='%23ffffff' opacity='0.85'/></svg>") 3 3, auto;
-}
-
-[data-theme="dark"] a, [data-theme="dark"] button, [data-theme="dark"] [role="button"], [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea, [data-theme="dark"] label, [data-theme="dark"] .card-hover-glow, [data-theme="dark"] .wallet-account-trigger, [data-theme="dark"] .spotlight {
-  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><path d='M2 2L12 26L16.5 16.5L26 12L2 2Z' fill='%2300D395' stroke='%23000000' stroke-width='1.5' stroke-linejoin='round'/><circle cx='21' cy='21' r='5.5' fill='%230a0b0e' stroke='%2312AAFF' stroke-width='1.5'/><circle cx='21' cy='21' r='2' fill='%2300D395'/></svg>") 2 2, pointer;
-}
-
 body {
   font-family: var(--font-sans);
   background: var(--bg);
