@@ -10,6 +10,114 @@ import { Modal, ModalHeader } from './ui/modal'
 import { toast } from 'sonner'
 import { downloadCertificate } from '../utils/generateCertificate'
 
+function buildLineageTree(records) {
+  if (!records || records.length === 0) return null;
+  
+  const map = {};
+  records.forEach(r => {
+    const key = (r.sha256_hash || r.Sha256Hash || '').toLowerCase();
+    map[key] = { ...r, children: [] };
+  });
+  
+  let root = null;
+  const sortedRecords = [...records].sort((a, b) => (a.timestamp || a.Timestamp || 0) - (b.timestamp || b.Timestamp || 0));
+  
+  if (sortedRecords.length > 0) {
+    const oldestKey = (sortedRecords[0].sha256_hash || sortedRecords[0].Sha256Hash || '').toLowerCase();
+    root = map[oldestKey];
+  }
+  
+  records.forEach(r => {
+    const childKey = (r.sha256_hash || r.Sha256Hash || '').toLowerCase();
+    const parentKey = (r.parent_sha256 || r.ParentSha256 || '').toLowerCase();
+    
+    if (parentKey && map[parentKey] && childKey !== parentKey) {
+      const exists = map[parentKey].children.some(c => (c.sha256_hash || c.Sha256Hash || '').toLowerCase() === childKey);
+      if (!exists) {
+        map[parentKey].children.push(map[childKey]);
+      }
+    }
+  });
+
+  return root || Object.values(map)[0];
+}
+
+function TreeNode({ node, targetHash, onSelectNode }) {
+  if (!node) return null;
+  const currentHash = (node.sha256_hash || node.Sha256Hash || '').toLowerCase();
+  const isTarget = currentHash === targetHash.toLowerCase();
+  
+  const shortAddress = node.creator_address || node.CreatorAddress 
+    ? `${(node.creator_address || node.CreatorAddress).slice(0, 6)}...${(node.creator_address || node.CreatorAddress).slice(-4)}`
+    : 'Unknown';
+
+  const getGatewayUrl = (url, cid) => {
+    if (url) {
+      if (url.startsWith('ipfs://')) return `https://gateway.pinata.cloud/ipfs/${url.slice(7)}`;
+      return url;
+    }
+    if (cid) return `https://gateway.pinata.cloud/ipfs/${cid}`;
+    return null;
+  };
+
+  const previewSrc = getGatewayUrl(node.media_s3_url || node.media_ipfs_url || node.MediaS3Url || node.MediaIpfsUrl, node.ipfs_cid || node.IpfsCid);
+
+  return (
+    <div className="flex flex-col items-center relative">
+      <div 
+        onClick={() => onSelectNode(node)}
+        className={`z-10 cursor-pointer flex flex-col items-center p-2 bg-[var(--bg-3)] border rounded-xl shadow-lg transition-all duration-200 hover:scale-105 hover:border-[#12AAFF]/50 w-28 text-center ${
+          isTarget ? 'border-[#12AAFF] ring-2 ring-[#12AAFF]/20 bg-[#12AAFF]/5' : 'border-[var(--border)]'
+        }`}
+      >
+        {previewSrc ? (
+          <img 
+            src={previewSrc} 
+            alt="Preview" 
+            className="w-10 h-10 object-cover rounded-md mb-1 border border-[var(--border)]"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-md bg-[var(--bg-2)] flex items-center justify-center text-[8px] text-[var(--text-3)] mb-1 border border-[var(--border)]">
+            No Img
+          </div>
+        )}
+        <div className="text-[9px] font-bold truncate w-full text-[var(--text-1)]">
+          {node.organization_name || node.organizationName || (node.media_type === 'video' ? 'Video file' : 'Image')}
+        </div>
+        <div className="text-[7px] text-[var(--text-3)] truncate w-full font-mono mt-0.5">
+          {shortAddress}
+        </div>
+        {isTarget && (
+          <span className="mt-1 text-[7px] uppercase tracking-wider font-extrabold text-[#12AAFF] bg-[#12AAFF]/10 px-1.5 py-0.5 rounded">
+            Target
+          </span>
+        )}
+      </div>
+
+      {node.children && node.children.length > 0 && (
+        <div className="flex flex-col items-center w-full relative">
+          <div className="w-0.5 h-4 bg-[var(--border)]"></div>
+          <div className="flex justify-center relative w-full">
+            {node.children.length > 1 && (
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-[var(--border)] w-[calc(100%-2rem)] mx-auto"></div>
+            )}
+            <div className="flex gap-4 pt-3">
+              {node.children.map((child) => (
+                <TreeNode 
+                  key={child.sha256_hash || child.Sha256Hash || Math.random()} 
+                  node={child} 
+                  targetHash={targetHash} 
+                  onSelectNode={onSelectNode}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SearchResults({ results, loading, uploadedFile }) {
   const [localPreviewUrl, setLocalPreviewUrl] = useState(null)
   const [comparisonMatch, setComparisonMatch] = useState(null)
@@ -26,10 +134,37 @@ export default function SearchResults({ results, loading, uploadedFile }) {
   const [flagReason, setFlagReason] = useState('Voice-Cloned/Audio Deepfake')
   const [submittingFlag, setSubmittingFlag] = useState(false)
 
+  const [lineageData, setLineageData] = useState(null)
+  const [lineageLoading, setLineageLoading] = useState(false)
+
+  const fetchLineage = async (hash) => {
+    setLineageLoading(true)
+    try {
+      const res = await fetch(`${CORE_BACKEND_API}/api/v1/content/${hash}/lineage`)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.lineage) {
+          setLineageData(buildLineageTree(data.lineage))
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch lineage", e)
+    } finally {
+      setLineageLoading(false)
+    }
+  }
+
   // Reset flag form when comparison target changes
   useEffect(() => {
     setShowFlagForm(false)
     setFlagReason('Voice-Cloned/Audio Deepfake')
+    setLineageData(null)
+    if (comparisonMatch) {
+      const hash = comparisonMatch.sha256Hash || comparisonMatch.sha256_hash || comparisonMatch.sha256
+      if (hash) {
+        fetchLineage(hash)
+      }
+    }
   }, [comparisonMatch])
 
   const handleDownloadCert = async () => {
@@ -323,6 +458,41 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Heritage Tree (Lineage DAG) */}
+              <div className="flex flex-col gap-3 border-t border-[var(--border)] pt-4">
+                <div className="text-xs font-bold uppercase tracking-wider text-[var(--text-2)]">Asset Heritage Tree (Lineage DAG)</div>
+                <div className="text-[11px] text-[var(--text-3)] mb-1">Trace original ancestors, sibling crops, and downstream derivatives. Click any node to inspect details.</div>
+                
+                {lineageLoading ? (
+                  <div className="flex justify-center p-6"><Spinner /></div>
+                ) : lineageData ? (
+                  <div className="w-full overflow-x-auto py-6 bg-[var(--bg-2)] border border-[var(--border)] rounded-xl flex justify-center min-h-[180px]">
+                    <div className="flex justify-center items-start min-w-max px-6">
+                      <TreeNode 
+                        node={lineageData} 
+                        targetHash={comparisonMatch.sha256Hash || comparisonMatch.sha256_hash || comparisonMatch.sha256}
+                        onSelectNode={(selectedNode) => {
+                          setComparisonMatch({
+                            sha256: selectedNode.sha256_hash || selectedNode.Sha256Hash,
+                            creator: selectedNode.creator_address || selectedNode.CreatorAddress,
+                            timestamp: selectedNode.timestamp || selectedNode.Timestamp,
+                            phash: selectedNode.phash || selectedNode.PHash,
+                            ipfsCid: selectedNode.ipfs_cid || selectedNode.IpfsCid,
+                            aiTool: selectedNode.ai_tool || selectedNode.AiTool,
+                            mediaIpfsUrl: selectedNode.media_ipfs_url || selectedNode.MediaIpfsUrl,
+                            mediaS3Url: selectedNode.media_s3_url || selectedNode.MediaS3Url,
+                            allowAiTraining: selectedNode.allow_ai_training || selectedNode.AllowAiTraining,
+                            mediaType: selectedNode.media_type || selectedNode.MediaType
+                          })
+                        }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center p-4 text-xs text-[var(--text-3)] bg-[var(--bg-2)] border border-[var(--border)] rounded-xl">No lineage tracking available.</div>
+                )}
               </div>
 
               {/* Temporal Integrity & Deepfake Sync */}
