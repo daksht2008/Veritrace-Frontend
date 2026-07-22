@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CircleCheck as CheckCircle2, Search, TriangleAlert as AlertTriangle, Lock, Cloud, ExternalLink } from 'lucide-react'
+import { CircleCheck as CheckCircle2, Search, TriangleAlert as AlertTriangle, Lock, Cloud, ExternalLink, Flag } from 'lucide-react'
 import { ARBITRUM_SEPOLIA, CORE_BACKEND_API, HASH_ENGINE_API } from '../config'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { Spinner } from './ui/spinner'
 import { EmptyState } from './ui/empty-state'
 import { Modal, ModalHeader } from './ui/modal'
+import { toast } from 'sonner'
 
 export default function SearchResults({ results, loading, uploadedFile }) {
   const [localPreviewUrl, setLocalPreviewUrl] = useState(null)
@@ -19,6 +20,48 @@ export default function SearchResults({ results, loading, uploadedFile }) {
   const [uploadingLegacy, setUploadingLegacy] = useState(false)
   const [syncLoading, setSyncLoading] = useState(false)
   const [syncResult, setSyncResult] = useState(null)
+
+  const [showFlagForm, setShowFlagForm] = useState(false)
+  const [flagReason, setFlagReason] = useState('Voice-Cloned/Audio Deepfake')
+  const [submittingFlag, setSubmittingFlag] = useState(false)
+
+  // Reset flag form when comparison target changes
+  useEffect(() => {
+    setShowFlagForm(false)
+    setFlagReason('Voice-Cloned/Audio Deepfake')
+  }, [comparisonMatch])
+
+  const submitDispute = async () => {
+    if (!comparisonMatch) return
+    setSubmittingFlag(true)
+    try {
+      const sha256 = comparisonMatch.sha256
+      const res = await fetch(`${CORE_BACKEND_API}/api/v1/verify/flag`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sha256: sha256,
+          reporter: '0x3d434220b22a0100d395000000000000000002ba', // simulated connected wallet
+          reason: flagReason,
+        }),
+      })
+      if (res.ok) {
+        toast.success('Dispute filed successfully!')
+        setShowFlagForm(false)
+        comparisonMatch.flagCount = (comparisonMatch.flagCount || 0) + 1
+        comparisonMatch.flag_count = (comparisonMatch.flag_count || 0) + 1
+      } else {
+        const data = await res.json()
+        toast.error(`Failed to file dispute: ${data.error || 'Unknown error'}`)
+      }
+    } catch (err) {
+      toast.error(`Error filing dispute: ${err.message}`)
+    } finally {
+      setSubmittingFlag(false)
+    }
+  }
 
   useEffect(() => {
     if (!uploadedFile || (!uploadedFile.type?.startsWith('image/') && !uploadedFile.type?.startsWith('video/'))) { setLocalPreviewUrl(null); return }
@@ -199,6 +242,50 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                   <div className="font-semibold text-[var(--text-2)] mb-1">On-Chain Record</div>
                   <div className="text-[var(--text-3)]">Owner: <span className="font-mono">{comparisonMatch.creator ? `${comparisonMatch.creator.slice(0, 8)}...${comparisonMatch.creator.slice(-6)}` : 'Unknown'}</span></div>
                   <div className="text-[var(--text-3)]">Registered: {comparisonMatch.registeredAt}</div>
+                  {(comparisonMatch.flagCount || comparisonMatch.flag_count) > 0 && (
+                    <div className="text-red-400 font-semibold flex items-center gap-1.5 mt-1 text-[11px]">
+                      <Flag size={12} className="text-red-400" /> Disputed ({(comparisonMatch.flagCount || comparisonMatch.flag_count)} {(comparisonMatch.flagCount || comparisonMatch.flag_count) === 1 ? 'report' : 'reports'})
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Flag / Dispute Section */}
+              <div className="flex flex-col gap-3 border-t border-[var(--border)] pt-3 mt-1">
+                <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-red-400 flex items-center gap-1"><Flag size={12} /> Dispute Registry Entry</div>
+                      <div className="text-[10px] text-[var(--text-3)] mt-0.5">Flag this registry match if you believe it is a manipulated variant or plagiarized copy.</div>
+                    </div>
+                    {!showFlagForm && (
+                      <Button variant="outline" size="sm" className="border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 text-xs py-1 transition-colors" onClick={() => setShowFlagForm(true)}>
+                        File Dispute
+                      </Button>
+                    )}
+                  </div>
+
+                  {showFlagForm && (
+                    <div className="flex flex-col gap-2 border-t border-red-500/10 pt-2.5">
+                      <div className="text-[10px] font-semibold text-[var(--text-2)]">Flagger wallet: <span className="font-mono text-[var(--text-3)]">0x3d434220b22a0100d395000000000000000002ba</span> (Connected)</div>
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[9px] uppercase font-bold text-[var(--text-3)]">Reason for Dispute</label>
+                        <select className="w-full p-2 bg-[var(--bg-2)] border border-[var(--border)] rounded-lg text-xs focus:border-[#12AAFF] focus:outline-none" value={flagReason} onChange={(e) => setFlagReason(e.target.value)}>
+                          <option value="Voice-Cloned/Audio Deepfake">Voice-Cloned/Audio Deepfake</option>
+                          <option value="Cropped or Resized Derivative">Cropped or Resized Derivative</option>
+                          <option value="Manipulated/Altered Pixels">Manipulated/Altered Pixels</option>
+                          <option value="Plagiarized Copy">Plagiarized Copy</option>
+                          <option value="Other / Metadata Override">Other / Metadata Override</option>
+                        </select>
+                      </div>
+                      <div className="flex gap-2 justify-end mt-1">
+                        <Button variant="outline" size="sm" className="text-xs py-1" onClick={() => setShowFlagForm(false)}>Cancel</Button>
+                        <Button variant="primary" size="sm" className="bg-red-500 hover:bg-red-600 border-none text-xs py-1 text-white" onClick={submitDispute} disabled={submittingFlag}>
+                          {submittingFlag ? 'Submitting...' : 'Submit Dispute'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -273,6 +360,11 @@ function MatchCard({ result, onSelect, isEarliest }) {
           {result.confidenceTier && (
             <Badge variant={result.confidenceTier === 'High' ? 'success' : result.confidenceTier === 'Medium' ? 'warning' : 'danger'} className="ml-1">
               Confidence: {result.confidenceTier} ({result.confidenceScore?.toFixed(0)}%)
+            </Badge>
+          )}
+          {(result.flagCount || result.flag_count) > 0 && (
+            <Badge variant="danger" className="ml-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20 flex items-center gap-1">
+              <Flag size={10} className="text-red-400" /> {(result.flagCount || result.flag_count)} {(result.flagCount || result.flag_count) === 1 ? 'Dispute' : 'Disputes'}
             </Badge>
           )}
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">{result.mediaType || 'unknown'}</span>
