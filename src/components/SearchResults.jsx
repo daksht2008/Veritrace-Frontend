@@ -239,12 +239,30 @@ export default function SearchResults({ results, loading, uploadedFile }) {
                   )}
                 </div>
                 <div>
-                  <div className="font-semibold text-[var(--text-2)] mb-1">On-Chain Record</div>
+                  <div className="font-semibold text-[var(--text-2)] mb-1 font-bold">On-Chain Record</div>
                   <div className="text-[var(--text-3)]">Owner: <span className="font-mono">{comparisonMatch.creator ? `${comparisonMatch.creator.slice(0, 8)}...${comparisonMatch.creator.slice(-6)}` : 'Unknown'}</span></div>
                   <div className="text-[var(--text-3)]">Registered: {comparisonMatch.registeredAt}</div>
-                  {(comparisonMatch.flagCount || comparisonMatch.flag_count) > 0 && (
+                  
+                  {(comparisonMatch.isPublisherVerified || comparisonMatch.is_publisher_verified) && (
+                    <div className="text-blue-400 font-bold flex items-center gap-1.5 mt-1 text-[11px]">
+                      ✓ Verified Source: {comparisonMatch.publisherName || comparisonMatch.publisher_name}
+                    </div>
+                  )}
+                  
+                  {(comparisonMatch.publisherFlagCount || comparisonMatch.publisher_flag_count) > 0 && (
+                    <div className="text-red-500 font-extrabold flex items-center gap-1.5 mt-1 text-[11px] bg-red-500/10 px-2 py-1 rounded border border-red-500/25">
+                      ⚠️ Verified Editorial Alert: Disputed by Official Publisher
+                    </div>
+                  )}
+                  
+                  {(comparisonMatch.flagCount || comparisonMatch.flag_count) > 0 && !(comparisonMatch.publisherFlagCount || comparisonMatch.publisher_flag_count) && (
                     <div className="text-red-400 font-semibold flex items-center gap-1.5 mt-1 text-[11px]">
                       <Flag size={12} className="text-red-400" /> Disputed ({(comparisonMatch.flagCount || comparisonMatch.flag_count)} {(comparisonMatch.flagCount || comparisonMatch.flag_count) === 1 ? 'report' : 'reports'})
+                    </div>
+                  )}
+                  {(comparisonMatch.consensusCount || comparisonMatch.consensus_count) > 1 && (
+                    <div className="text-emerald-400 font-semibold flex items-center gap-1.5 mt-1 text-[11px]">
+                      🤝 Consensus: {(comparisonMatch.consensusCount || comparisonMatch.consensus_count)} independent creators verified
                     </div>
                   )}
                 </div>
@@ -362,9 +380,24 @@ function MatchCard({ result, onSelect, isEarliest }) {
               Confidence: {result.confidenceTier} ({result.confidenceScore?.toFixed(0)}%)
             </Badge>
           )}
-          {(result.flagCount || result.flag_count) > 0 && (
+          {(result.isPublisherVerified || result.is_publisher_verified) && (
+            <Badge variant="success" className="ml-1 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20 flex items-center gap-1 font-bold">
+              ✓ Verified Source: {result.publisherName || result.publisher_name || 'Official Outlet'}
+            </Badge>
+          )}
+          {(result.publisherFlagCount || result.publisher_flag_count) > 0 && (
+            <Badge variant="danger" className="ml-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/30 flex items-center gap-1 font-bold">
+              ⚠️ Verified Dispute Alert
+            </Badge>
+          )}
+          {(result.flagCount || result.flag_count) > 0 && !(result.publisherFlagCount || result.publisher_flag_count) && (
             <Badge variant="danger" className="ml-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20 flex items-center gap-1">
               <Flag size={10} className="text-red-400" /> {(result.flagCount || result.flag_count)} {(result.flagCount || result.flag_count) === 1 ? 'Dispute' : 'Disputes'}
+            </Badge>
+          )}
+          {(result.consensusCount || result.consensus_count) > 1 && (
+            <Badge variant="success" className="ml-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/20 flex items-center gap-1">
+              🤝 Consensus: {(result.consensusCount || result.consensus_count)} Creators
             </Badge>
           )}
           <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-3)]">{result.mediaType || 'unknown'}</span>

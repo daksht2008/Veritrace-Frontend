@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAccount, useWriteContract, useConfig, useSwitchChain } from 'wagmi'
@@ -14,7 +14,7 @@ import { toast } from 'sonner'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
 import PageHero from '../components/PageHero'
-import { Database, Shield, CheckCircle2, AlertTriangle, ExternalLink, Download } from 'lucide-react'
+import { Database, Shield, CheckCircle2, AlertTriangle, ExternalLink, Download, Globe, Building, Check, FileText, Copy } from 'lucide-react'
 import { CORE_BACKEND_API, CONTRACT_ADDRESS, CONTRACT_ABI, ARBITRUM_SEPOLIA } from '../config'
 
 // Mock USDC Address on Sepolia (usually provided by environment, hardcoded for demo)
@@ -38,6 +38,65 @@ export default function EnterprisePage() {
   const [txHash, setTxHash] = useState('')
   const [unlockedLinks, setUnlockedLinks] = useState([])
   const [error, setError] = useState(null)
+
+  const [activeTab, setActiveTab] = useState('dataset')
+  const [publisherDomain, setPublisherDomain] = useState('')
+  const [publisherOrg, setPublisherOrg] = useState('')
+  const [verifyingPublisher, setVerifyingPublisher] = useState(false)
+  const [publishersList, setPublishersList] = useState([])
+  const [fetchingPublishers, setFetchingPublishers] = useState(false)
+
+  const fetchPublishers = async () => {
+    setFetchingPublishers(true)
+    try {
+      const res = await fetch(`${CORE_BACKEND_API}/api/v1/publisher/list`)
+      const data = await res.json()
+      if (res.ok && data.publishers) {
+        setPublishersList(data.publishers)
+      }
+    } catch (err) {
+      console.error('Failed to fetch publishers:', err)
+    } finally {
+      setFetchingPublishers(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'publisher') {
+      fetchPublishers()
+    }
+  }, [activeTab])
+
+  const handleVerifyPublisher = async (e) => {
+    e.preventDefault()
+    if (!publisherDomain || !publisherOrg) {
+      toast.error('Domain and Organization Name are required')
+      return
+    }
+    const targetAddress = address || '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+    
+    setVerifyingPublisher(true)
+    try {
+      const res = await fetch(`${CORE_BACKEND_API}/api/v1/publisher/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          domain: publisherDomain,
+          address: targetAddress
+        })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Verification failed')
+      toast.success('Domain bound and verified successfully!')
+      fetchPublishers()
+      setPublisherDomain('')
+      setPublisherOrg('')
+    } catch (err) {
+      toast.error(`Verification Failed: ${err.message}`)
+    } finally {
+      setVerifyingPublisher(false)
+    }
+  }
 
   const handleQuery = async () => {
     setQuerying(true)
@@ -181,7 +240,31 @@ export default function EnterprisePage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
+        <div className="flex border-b border-[var(--border)] mb-6 gap-2">
+          <button
+            onClick={() => setActiveTab('dataset')}
+            className={`py-3 px-6 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'dataset'
+                ? 'border-[#12AAFF] text-[#12AAFF] bg-[#12AAFF]/5 rounded-t-xl'
+                : 'border-transparent text-[var(--text-3)] hover:text-[var(--text-2)]'
+            }`}
+          >
+            📂 Dataset Licensing Market
+          </button>
+          <button
+            onClick={() => setActiveTab('publisher')}
+            className={`py-3 px-6 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === 'publisher'
+                ? 'border-[#12AAFF] text-[#12AAFF] bg-[#12AAFF]/5 rounded-t-xl'
+                : 'border-transparent text-[var(--text-3)] hover:text-[var(--text-2)]'
+            }`}
+          >
+            🏢 Verified Publisher Network
+          </button>
+        </div>
+
+        {activeTab === 'dataset' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-6">
           {/* Query Form */}
           <div className="flex flex-col gap-5">
             <SpotlightCard>
@@ -403,6 +486,139 @@ export default function EnterprisePage() {
           </div>
 
         </div>
+        )}
+
+        {activeTab === 'publisher' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div className="flex flex-col gap-6">
+              {/* Domain Registration Form */}
+              <SpotlightCard>
+                <Card className="card-hover-glow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Globe size={18} className="text-[#12AAFF]" /> Organization Registration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardBody className="flex flex-col gap-4">
+                    <form onSubmit={handleVerifyPublisher} className="flex flex-col gap-4">
+                      <div>
+                        <label className="text-xs font-semibold text-[var(--text-3)] block mb-1.5">Organization Name</label>
+                        <input
+                          type="text"
+                          value={publisherOrg}
+                          onChange={(e) => setPublisherOrg(e.target.value)}
+                          placeholder='e.g. "Associated Press"'
+                          className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-2)] border border-[var(--border)] text-[var(--text)] outline-none focus:border-[#12AAFF]"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-[var(--text-3)] block mb-1.5">Official Web Domain</label>
+                        <input
+                          type="text"
+                          value={publisherDomain}
+                          onChange={(e) => setPublisherDomain(e.target.value)}
+                          placeholder='e.g. "apnews.com"'
+                          className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-2)] border border-[var(--border)] text-[var(--text)] outline-none focus:border-[#12AAFF]"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-[var(--text-3)] block mb-1.5">Publisher Wallet Address</label>
+                        <input
+                          type="text"
+                          value={address || '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'}
+                          disabled
+                          className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-[var(--bg-2)] border border-[var(--border)] text-[var(--text-3)] font-mono outline-none cursor-not-allowed"
+                        />
+                      </div>
+                      <Button variant="primary" size="lg" className="w-full mt-2" type="submit" disabled={verifyingPublisher}>
+                        {verifyingPublisher ? <Spinner size="sm" /> : 'Request Domain Attestation'}
+                      </Button>
+                    </form>
+                  </CardBody>
+                </Card>
+              </SpotlightCard>
+
+              {/* JSON Template Card */}
+              <SpotlightCard>
+                <Card className="border-[#12AAFF]/20 bg-[#12AAFF]/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#12AAFF]">
+                      <FileText size={14} /> HTTPS DID Requirement
+                    </CardTitle>
+                  </CardHeader>
+                  <CardBody className="text-xs text-[var(--text-2)] flex flex-col gap-3">
+                    <p>
+                      Before clicking verify, you must host a JSON metadata file on your domain at:
+                    </p>
+                    <div className="bg-[var(--bg-2)] p-2 rounded font-mono text-[10px] text-[#12AAFF] break-all border border-[var(--border)]">
+                      https://{publisherDomain || "[your-domain]"}/.well-known/veritrace.json
+                    </div>
+                    <p>File content format:</p>
+                    <pre className="bg-[var(--bg-2)] p-3 rounded-lg font-mono text-[10px] text-[var(--text)] overflow-x-auto border border-[var(--border)] relative group">
+                      {JSON.stringify({
+                        organization_name: publisherOrg || "Associated Press",
+                        domain: publisherDomain || "apnews.com",
+                        creator_address: address || "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+                      }, null, 2)}
+                    </pre>
+                  </CardBody>
+                </Card>
+              </SpotlightCard>
+            </div>
+
+            <div className="flex flex-col gap-6">
+              {/* Publishers List */}
+              <SpotlightCard>
+                <Card className="card-hover-glow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building size={18} className="text-[#12AAFF]" /> Verified Publisher Network
+                    </CardTitle>
+                  </CardHeader>
+                  <CardBody className="flex flex-col gap-4">
+                    {fetchingPublishers ? (
+                      <div className="text-center py-8 text-[var(--text-3)] text-sm flex flex-col items-center gap-2">
+                        <Spinner /> Retrieving trusted directory...
+                      </div>
+                    ) : publishersList.length === 0 ? (
+                      <div className="text-center py-8 text-[var(--text-3)] text-sm">
+                        No verified publishers registered yet. Use the form to verify.
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        {publishersList.map((pub) => (
+                          <div key={pub.creator_address} className="p-4 rounded-2xl bg-[var(--surface-2)] border border-[var(--border)] flex flex-col gap-2 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-[4px] h-full bg-[#12AAFF]" />
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-sm text-[var(--text)] flex items-center gap-1.5">
+                                🏢 {pub.organization_name}
+                                <Badge variant="success" className="bg-[#12AAFF]/10 text-[#12AAFF] border-[#12AAFF]/20 text-[9px] py-0 px-1.5 flex items-center gap-0.5">
+                                  ✓ DID Bound
+                                </Badge>
+                              </span>
+                              <a href={`https://${pub.domain}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#12AAFF] hover:underline flex items-center gap-1">
+                                {pub.domain} <ExternalLink size={10} />
+                              </a>
+                            </div>
+                            <div className="text-[10px] text-[var(--text-3)] font-mono truncate">
+                              Wallet: {pub.creator_address}
+                            </div>
+                            <div className="text-[9px] text-[var(--text-3)] flex items-center justify-between mt-1 border-t border-[var(--border)] pt-2">
+                              <span>Verified: {new Date(pub.verified_at * 1000).toLocaleDateString()}</span>
+                              <span className="text-[#00D395] font-bold">✓ On-Chain Registry</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardBody>
+                </Card>
+              </SpotlightCard>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )

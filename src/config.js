@@ -40,9 +40,9 @@ export const RAG_BOT_API = import.meta.env.VITE_RAG_BOT_API || 'https://rag-bot-
 /**
  * Deployed VeritraceRegistry Stylus contract address.
  * Written in Rust, compiled to WASM, deployed on Arbitrum Sepolia.
- * Explorer: https://sepolia.arbiscan.io/address/0xd5a4e9185cbcea881f2c76b07732335250537820
+ * Explorer: https://sepolia.arbiscan.io/address/0xeb09ca3b844693817479cf33fd88cdf02c2711fd
  */
-export const CONTRACT_ADDRESS = '0xd5a4e9185cbcea881f2c76b07732335250537820';
+export const CONTRACT_ADDRESS = '0xeb09ca3b844693817479cf33fd88cdf02c2711fd';
 
 /**
  * ABI for the VeritraceRegistry contract.
@@ -67,6 +67,15 @@ export const CONTRACT_ABI = [
 
   // ── Read function: Verify content by hash ──
   'function verifyContent(bytes32 sha256hash) view returns (address creator, uint64 timestamp, uint64 phash, string ipfs_cid, string ai_tool, bool allow_ai_training)',
+
+  // ── Write function: Add verified publisher ──
+  'function addVerifiedPublisher(address publisher, string org_name)',
+
+  // ── Write function: Remove verified publisher ──
+  'function removeVerifiedPublisher(address publisher)',
+
+  // ── Read function: Check if publisher is verified ──
+  'function isVerifiedPublisher(address publisher) view returns (string orgName, bool isVerified)',
 
   // ── Event: Emitted when content is registered ──
   'event ContentRegistered(bytes32 indexed sha256hash, address indexed creator, uint64 phash, uint64 timestamp, string ipfsCid, string aitool, bool allowAiTraining)',
