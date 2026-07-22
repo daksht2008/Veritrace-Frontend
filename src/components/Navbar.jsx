@@ -44,14 +44,12 @@ export default function Navbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
         className={cn(
-          'fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300',
-          'w-[calc(100%-2rem)] max-w-[1080px]'
+          'sticky top-0 z-50 w-full transition-all duration-300',
+          scrolled ? 'glass shadow-[0_4px_24px_rgba(0,0,0,0.18)] border-b border-[var(--border-2)]' : 'bg-transparent'
         )}
       >
         <div className={cn(
-          'flex items-center justify-between h-14 px-3 rounded-2xl transition-all duration-300',
-          '!border !border-[var(--border-2)] hover:!border-[#12AAFF]/40',
-          scrolled ? 'glass shadow-[0_8px_32px_rgba(0,0,0,0.12)]' : 'glass'
+          'flex items-center justify-between h-14 px-6 max-w-[1200px] mx-auto transition-all duration-300'
         )}>
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 pl-1">
@@ -143,8 +141,7 @@ export default function Navbar() {
         </AnimatePresence>
       </motion.nav>
 
-      {/* Spacer to offset fixed navbar */}
-      <div className="h-20" />
+
     </>
   )
 }
