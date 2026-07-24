@@ -41,34 +41,38 @@
 
 /* ─── Root token map ─── */
 :root {
-  /* Light mode */
-  --bg: #f7f9fc;
-  --bg-2: #F4F5F7;
-  --bg-3: #ECEEF2;
-  --surface: #FFFFFF;
-  --surface-2: #F8F9FB;
-  --surface-3: #F0F2F5;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-2: rgba(0, 0, 0, 0.12);
-  --text: #0A0B0E;
-  --text-2: #3D4152;
+  /* Light mode — clean white, premium feel */
+  --bg: #ffffff;
+  --bg-2: #f8f9fa;
+  --bg-3: #f1f3f5;
+  --surface: #ffffff;
+  --surface-2: #fafafa;
+  --surface-3: #f1f3f5;
+  /* High-contrast borders keep every white surface clearly defined. */
+  --border: #000000;
+  --border-2: #000000;
+  --text: #111827;
+  --text-2: #374151;
   --text-3: #6B7280;
   --text-4: #9CA3AF;
   --arb: #12AAFF;
-  --arb-bg: rgba(18, 170, 255, 0.08);
-  --arb-border: rgba(18, 170, 255, 0.25);
-  --success-bg: rgba(0, 211, 149, 0.08);
-  --success-border: rgba(0, 211, 149, 0.25);
-  --danger-bg: rgba(255, 77, 77, 0.08);
-  --danger-border: rgba(255, 77, 77, 0.25);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
-  --shadow-arb: 0 0 24px rgba(18, 170, 255, 0.2);
-  --shadow-arb-lg: 0 0 60px rgba(18, 170, 255, 0.15);
-  --navbar-bg: rgba(255, 255, 255, 0.8);
-  --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 249, 251, 0.7));
-  --glow-arb: rgba(18, 170, 255, 0.15);
+  --arb-bg: rgba(18, 170, 255, 0.06);
+  --arb-border: rgba(18, 170, 255, 0.20);
+  --success-bg: rgba(0, 211, 149, 0.06);
+  --success-border: rgba(0, 211, 149, 0.20);
+  --danger-bg: rgba(255, 77, 77, 0.06);
+  --danger-border: rgba(255, 77, 77, 0.20);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+  --shadow-arb: 0 0 20px rgba(18, 170, 255, 0.12);
+  --shadow-arb-lg: 0 0 48px rgba(18, 170, 255, 0.10);
+  --navbar-bg: rgba(255, 255, 255, 0.92);
+  --card-gradient: linear-gradient(135deg, #ffffff, #fafafa);
+  --glow-arb: rgba(18, 170, 255, 0.08);
+  --footer-bg: #ffffff;
+  --footer-text: #111827;
+  --footer-text-muted: #6B7280;
 }
 
 [data-theme="dark"] {
@@ -99,6 +103,9 @@
   --navbar-bg: rgba(0, 0, 0, 0.92);
   --card-gradient: linear-gradient(135deg, rgba(6, 7, 10, .98), rgba(11, 13, 18, .95));
   --glow-arb: rgba(18, 170, 255, 0.1);
+  --footer-bg: #090a0f;
+  --footer-text: #F5F7FC;
+  --footer-text-muted: #8A92AC;
 }
 
 [data-theme="dark"] .ambient-grid {
@@ -135,6 +142,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+
 body {
   font-family: var(--font-sans);
   background: var(--bg);
@@ -162,6 +170,17 @@ footer {
   pointer-events: none;
   z-index: -1;
   background: var(--bg);
+}
+
+/* Light mode: hide all ambient effects for a clean white feel */
+html:not([data-theme="dark"]) .ambient-background .ambient-orb,
+html:not([data-theme="dark"]) .ambient-background .ambient-grid,
+html:not([data-theme="dark"]) .ambient-background .ambient-noise {
+  opacity: 0 !important;
+}
+
+html:not([data-theme="dark"]) .ambient-background>div:first-child {
+  opacity: 0 !important;
 }
 
 .ambient-grid {
@@ -234,6 +253,10 @@ footer {
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
+  background: linear-gradient(115deg, rgba(18, 170, 255, .03), transparent 50%);
+}
+
+[data-theme="dark"] .page-hero {
   background: linear-gradient(115deg, rgba(18, 170, 255, .105), rgba(27, 74, 221, .035) 48%, transparent 74%);
 }
 
@@ -620,9 +643,11 @@ footer {
   0% {
     transform: translate3d(0%, 0%, 0) rotate(0deg) scale(1);
   }
+
   50% {
     transform: translate3d(-10%, 6%, 0) rotate(4deg) scale(1.08);
   }
+
   100% {
     transform: translate3d(0%, 0%, 0) rotate(0deg) scale(1);
   }
@@ -632,9 +657,11 @@ footer {
   0% {
     transform: translate3d(0%, 0%, 0) rotate(0deg) scale(1.05);
   }
+
   50% {
     transform: translate3d(8%, -6%, 0) rotate(-4deg) scale(1);
   }
+
   100% {
     transform: translate3d(0%, 0%, 0) rotate(0deg) scale(1.05);
   }
@@ -1629,3 +1656,91 @@ footer {
 [data-theme="dark"] footer {
   border-top: 1px solid var(--border-2);
 }
+
+/* Keep component dimensions identical when the palette changes. Light mode
+   uses strong black outlines; dark mode uses the same 2px geometry with its
+   existing dark-theme border colors, preventing a page-wide layout jump. */
+[data-theme="dark"] [data-card-surface],
+[data-theme="dark"] .glass,
+[data-theme="dark"] .glass-card,
+[data-theme="dark"] .border:not(.border-none),
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  border-width: 2px;
+}
+
+[data-theme="dark"] button:not(.border):not(.border-none) {
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+}
+
+/* ─── Light-mode high-contrast outlines ───
+   Cards, controls, and other bordered components share the same deliberate
+   black 2px outline so they remain visible against the white UI. */
+html:not([data-theme="dark"]) [data-card-surface],
+html:not([data-theme="dark"]) .glass,
+html:not([data-theme="dark"]) .glass-card,
+html:not([data-theme="dark"]) .border:not(.border-none),
+html:not([data-theme="dark"]) input,
+html:not([data-theme="dark"]) select,
+html:not([data-theme="dark"]) textarea,
+html:not([data-theme="dark"]) button:not(.border-none) {
+  border-width: 2px;
+  border-color: #000000;
+}
+
+html:not([data-theme="dark"]) button:not(.border-none) {
+  border-style: solid;
+}
+
+/* Preserve intentional utility overrides such as border-b-0. */
+html:not([data-theme="dark"]) .border-b-0 {
+  border-bottom-width: 0;
+}
+
+/* Homepage: a contained evidence network rather than page-wide aurora noise. */
+.home-proof-hero { position: relative; overflow: hidden; padding: 8rem 0 6rem; background: var(--bg); }
+.proof-grid { position: absolute; inset: 0; opacity: .48; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 52px 52px; mask-image: linear-gradient(90deg, black, transparent 80%); }
+.proof-wave { position: absolute; width: 72vw; height: 72vw; border: 1px solid rgba(18,170,255,.28); border-radius: 50%; right: -35vw; top: -30vw; transform: translate3d(0,0,0); animation: proof-wave 11s ease-in-out infinite; }
+.proof-wave-two { width: 54vw; height: 54vw; right: -22vw; top: -17vw; border-color: rgba(0,211,149,.22); animation-delay: -5.5s; }
+@keyframes proof-wave { 0%,100% { transform: scale(.92); opacity: .25; } 50% { transform: scale(1.08); opacity: .7; } }
+.proof-network-scene { position: relative; min-height: 410px; border: 2px solid var(--border); border-radius: 28px; background: color-mix(in srgb, var(--surface) 88%, transparent); box-shadow: var(--shadow-lg); overflow: hidden; }
+.proof-network-scene::before { content: ''; position: absolute; z-index: 1; inset: 10%; border: 1px dashed var(--arb-border); border-radius: 50%; animation: proof-orbit 18s linear infinite; pointer-events: none; }
+.proof-network-boxes { z-index: 0; opacity: .35; transform: perspective(700px) rotateX(52deg) scale(1.35) translateY(8%); transform-origin: center bottom; }
+@keyframes proof-orbit { to { transform: rotate(360deg); } }
+.proof-network-line { position: absolute; z-index: 2; height: 1px; transform-origin: left center; background: linear-gradient(90deg, transparent, #12AAFF, transparent); opacity: .8; pointer-events: none; }
+.proof-network-line-one { width: 44%; left: 18%; top: 35%; transform: rotate(24deg); }
+.proof-network-line-two { width: 40%; left: 40%; top: 52%; transform: rotate(-29deg); }
+.proof-network-line-three { width: 28%; left: 24%; top: 70%; transform: rotate(-37deg); }
+.proof-node { position: absolute; z-index: 3; display: flex; align-items: center; gap: .55rem; padding: .7rem .85rem; border: 2px solid var(--border); border-radius: 14px; background: var(--surface); color: var(--text); font-size: .72rem; font-weight: 800; box-shadow: var(--shadow-md); animation: proof-float 5.5s ease-in-out infinite; }
+.proof-node svg { color: #12AAFF; }.proof-node-source { left: 11%; top: 24%; }.proof-node-hash { left: 45%; top: 34%; animation-delay: -1.5s; }.proof-node-chain { left: 57%; top: 63%; animation-delay: -3s; }.proof-node-verified { left: 18%; top: 68%; animation-delay: -4s; }.proof-node-verified svg { color: #00D395; }
+@keyframes proof-float { 50% { transform: translate3d(0,-9px,0); } }
+.proof-packet { position: absolute; z-index: 3; right: 7%; top: 10%; padding: .7rem .85rem; border: 2px solid #12AAFF; border-radius: 12px; background: var(--surface); color: #12AAFF; font-size: .63rem; font-weight: 900; letter-spacing: .1em; display: flex; gap: .45rem; align-items: center; }.proof-packet strong { color: var(--text-2); letter-spacing: 0; }
+.proof-scan, .proof-pulse { display: none; }
+
+/* Dark mode has a dedicated high-contrast evidence network. */
+[data-theme="dark"] .home-proof-hero { background: radial-gradient(ellipse 72% 80% at 82% 28%, rgba(18,170,255,.14), transparent 58%), radial-gradient(ellipse 50% 50% at 11% 82%, rgba(0,211,149,.08), transparent 70%), #02050b; }
+[data-theme="dark"] .proof-grid { opacity: 1; background-image: linear-gradient(rgba(76,195,255,.11) 1px, transparent 1px), linear-gradient(90deg, rgba(76,195,255,.11) 1px, transparent 1px); }
+[data-theme="dark"] .proof-wave { border-color: rgba(18,170,255,.5); box-shadow: 0 0 90px rgba(18,170,255,.12), inset 0 0 70px rgba(18,170,255,.06); opacity: .8; }
+[data-theme="dark"] .proof-wave-two { border-color: rgba(0,211,149,.42); }
+[data-theme="dark"] .proof-network-scene { background: linear-gradient(145deg, rgba(7,16,30,.96), rgba(2,7,15,.92)); border-color: rgba(76,195,255,.68); box-shadow: 0 0 0 1px rgba(18,170,255,.16), 0 24px 65px rgba(0,0,0,.55), 0 0 70px rgba(18,170,255,.12); }
+[data-theme="dark"] .proof-network-boxes { opacity: .7; background: radial-gradient(circle at 50% 50%, rgba(18,170,255,.13), transparent 62%); }
+[data-theme="dark"] .proof-network-boxes > div { border-color: rgba(76,195,255,.2) !important; }
+[data-theme="dark"] .proof-network-line { height: 2px; opacity: 1; background-size: 220% 100%; box-shadow: 0 0 12px rgba(18,170,255,.85); animation: proof-signal 2.8s linear infinite; }
+@keyframes proof-signal { to { background-position: -220% 0; } }
+[data-theme="dark"] .proof-node { background: rgba(7,15,28,.96); border-color: rgba(76,195,255,.72); color: #f5f7fc; box-shadow: 0 0 0 1px rgba(18,170,255,.12), 0 12px 30px rgba(0,0,0,.42), 0 0 22px rgba(18,170,255,.1); }
+[data-theme="dark"] .proof-node-hash { border-color: rgba(76,195,255,.9); } [data-theme="dark"] .proof-node-chain, [data-theme="dark"] .proof-node-verified { border-color: rgba(0,211,149,.68); }
+[data-theme="dark"] .proof-packet { background: rgba(4,13,25,.96); border-color: #12AAFF; box-shadow: 0 0 24px rgba(18,170,255,.26); } [data-theme="dark"] .proof-packet strong { color: #dce5f5; }
+[data-theme="dark"] .proof-scan { display: block; position: absolute; z-index: 2; inset: 0 auto 0 -18%; width: 18%; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(76,195,255,.16), transparent); transform: skewX(-18deg); animation: proof-scan 4.8s ease-in-out infinite; }
+@keyframes proof-scan { 0%,18% { transform: translateX(0) skewX(-18deg); opacity: 0; } 25% { opacity: 1; } 68% { transform: translateX(720%) skewX(-18deg); opacity: .8; } 76%,100% { transform: translateX(720%) skewX(-18deg); opacity: 0; } }
+[data-theme="dark"] .proof-pulse { display: block; position: absolute; z-index: 1; width: 11px; height: 11px; border-radius: 999px; background: #12AAFF; box-shadow: 0 0 0 7px rgba(18,170,255,.1), 0 0 18px #12AAFF; animation: proof-pulse 2.6s ease-in-out infinite; }
+.proof-pulse-one { left: 37%; top: 42%; }.proof-pulse-two { left: 65%; top: 56%; background: #00D395 !important; box-shadow: 0 0 0 7px rgba(0,211,149,.1), 0 0 18px #00D395 !important; animation-delay: -1.3s !important; }
+@keyframes proof-pulse { 50% { transform: scale(1.75); opacity: .36; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .proof-wave, .proof-network-scene::before, .proof-node { animation: none; }
+}
+
+@media (max-width: 1023px) { .home-proof-hero { padding-top: 7rem; } .proof-grid { mask-image: none; opacity: .26; } }
