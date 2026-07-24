@@ -20,6 +20,7 @@ import { toast } from 'sonner'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
 import PageHero from '../components/PageHero'
+import { ScrollReveal } from '../components/ui/scroll-reveal'
 import { useUpload } from '../context/UploadContext'
 import { downloadCertificate } from '../utils/generateCertificate'
 import { Upload, Fingerprint, Shield, CircleCheck as CheckCircle2, FilePlus, TriangleAlert as AlertTriangle, ExternalLink, Award, Bot, Webhook, FileText, Type } from 'lucide-react'
@@ -194,6 +195,7 @@ export default function RegisterPage() {
   return (
     <section>
       <PageHero eyebrow="CREATE AN IMMUTABLE RECORD" title="Make ownership undeniable." description="Generate a durable proof for media or text, then anchor the evidence to Arbitrum. Your original stays identifiable wherever it goes." icon={FilePlus} />
+      <ScrollReveal variant="fade-up">
       <div className="max-w-[1280px] mx-auto px-5 pt-7">
 
       {/* Faucet notice — shown when wallet is connected */}
@@ -431,6 +433,7 @@ export default function RegisterPage() {
         </div>
       </div>
       </div>
+      </ScrollReveal>
     </section>
   )
 }

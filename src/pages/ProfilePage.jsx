@@ -20,6 +20,7 @@ import { Alert } from '../components/ui/alert'
 import { Modal, ModalHeader } from '../components/ui/modal'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
+import { ScrollReveal } from '../components/ui/scroll-reveal'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, ARBITRUM_SEPOLIA } from '../config'
 import { cn } from '@/lib/utils'
 
@@ -541,6 +542,7 @@ export default function ProfilePage() {
   }
 
   return (
+    <ScrollReveal variant="fade-up">
     <div className="max-w-[1200px] mx-auto px-5 py-8 space-y-8">
 
       {/* ── Profile Header ── */}
@@ -738,5 +740,6 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
     </div>
+    </ScrollReveal>
   )
 }

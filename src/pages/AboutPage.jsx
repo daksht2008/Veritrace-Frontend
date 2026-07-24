@@ -37,13 +37,14 @@ const HASH_TYPES = [
 
 const FAQ = [
   { q: 'Does VeriTrace store my original file?', a: 'Yes — your file is pinned to IPFS (permanent, content-addressed) and backed up to S3. Only the fingerprint hashes are written on-chain; the file itself lives off-chain.' },
-  { q: 'What blockchain does VeriTrace use?', a: 'Arbitrum Sepolia (testnet). The registry smart contract is deployed at 0xd5a4e9185cbcea881f2c76b07732335250537820 and uses the Stylus VM for gas efficiency.' },
+  { q: 'What blockchain does VeriTrace use?', a: 'Arbitrum Sepolia (testnet). The registry smart contract is deployed at 0xeb09ca3b844693817479cf33fd88cdf02c2711fd and uses the Stylus VM for gas efficiency.' },
   { q: 'Can I detect AI-generated content?', a: 'Yes. The hash engine computes an AI confidence score. If it exceeds 75%, you must declare the AI model used during registration. Undeclared AI content is flagged.' },
   { q: 'What is the fuzzy match threshold?', a: 'A pHash Hamming distance ≤ 22 out of 64 bits is considered a match. For semantic vectors, cosine similarity ≥ 0.85 triggers a match. Face embeddings use a 0.6 cosine threshold.' },
   { q: 'Is the verification free?', a: 'Verification (exact, fuzzy, segmented) is free — it only hits the Go backend API. Only registration requires a gas-paid blockchain transaction.' },
 ]
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion'
+import { ScrollReveal } from '../components/ui/scroll-reveal'
 
 export default function AboutPage() {
   return (
@@ -70,79 +71,86 @@ export default function AboutPage() {
       </AuroraBackground>
 
       {/* ARCHITECTURE */}
-      <section className="max-w-[1280px] mx-auto px-5 py-16">
-        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Built to preserve context.</h2>
-        <p className="text-center text-sm text-[var(--text-3)] mb-10">Five purpose-built layers convert an upload into an enduring, verifiable proof.</p>
-        <div className="flex items-stretch justify-center gap-0 flex-wrap overflow-x-auto">
-          {[
-            { icon: Cpu, label: 'Hash Engine', sub: 'Port 8081', color: '#12AAFF' },
-            { icon: Pin, label: 'IPFS + S3', sub: 'Pinata / MinIO', color: '#4DC3FF' },
-            { icon: Shield, label: 'Arbitrum', sub: 'Smart Contract', color: '#1B4ADD' },
-            { icon: Server, label: 'Go Backend', sub: 'EVM Listener', color: '#00D395' },
-            { icon: Database, label: 'PG + Redis + Qdrant', sub: 'Storage Layer', color: '#FF9B00' },
-          ].map((node, i, arr) => (
-            <div key={i} className="flex items-center">
-              <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 text-center min-w-[130px] hover:border-[var(--border-2)] transition-colors">
-                <node.icon size={28} className="mx-auto mb-1.5" style={{ color: node.color }} />
-                <div className="font-bold text-sm text-[var(--text)]">{node.label}</div>
-                <div className="text-[11px] text-[var(--text-3)]">{node.sub}</div>
-              </motion.div>
-              {i < arr.length - 1 && <ArrowRight size={20} className="mx-1 text-[var(--text-4)] flex-shrink-0" />}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* HOW TO REGISTER & VERIFY STACKED FULL-WIDTH CAROUSELS */}
-      <section className="max-w-[1280px] mx-auto px-5 pb-16 space-y-10">
-        <div>
-          <div className="flex items-center gap-2.5 mb-4 px-2">
-            <span className="bg-[var(--arb-bg)] text-[#12AAFF] rounded-xl p-2"><FilePlus size={20} /></span>
-            <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Register</h2>
+      <ScrollReveal variant="fade-up">
+        <section className="max-w-[1280px] mx-auto px-5 py-16">
+          <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Built to preserve context.</h2>
+          <p className="text-center text-sm text-[var(--text-3)] mb-10">Five purpose-built layers convert an upload into an enduring, verifiable proof.</p>
+          <div className="flex items-stretch justify-center gap-0 flex-wrap overflow-x-auto">
+            {[
+              { icon: Cpu, label: 'Hash Engine', sub: 'Port 8081', color: '#12AAFF' },
+              { icon: Pin, label: 'IPFS + S3', sub: 'Pinata / MinIO', color: '#4DC3FF' },
+              { icon: Shield, label: 'Arbitrum', sub: 'Smart Contract', color: '#1B4ADD' },
+              { icon: Server, label: 'Go Backend', sub: 'EVM Listener', color: '#00D395' },
+              { icon: Database, label: 'PG + Redis + Qdrant', sub: 'Storage Layer', color: '#FF9B00' },
+            ].map((node, i, arr) => (
+              <div key={i} className="flex items-center">
+                <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-5 text-center min-w-[130px] hover:border-[var(--border-2)] transition-colors">
+                  <node.icon size={28} className="mx-auto mb-1.5" style={{ color: node.color }} />
+                  <div className="font-bold text-sm text-[var(--text)]">{node.label}</div>
+                  <div className="text-[11px] text-[var(--text-3)]">{node.sub}</div>
+                </motion.div>
+                {i < arr.length - 1 && <ArrowRight size={20} className="mx-1 text-[var(--text-4)] flex-shrink-0" />}
+              </div>
+            ))}
           </div>
-          <InfiniteMovingCards items={REGISTER_STEPS} speed="normal" direction="left" renderItem={(s) => (
-            <div className="w-[320px] sm:w-[360px]">
-              <StepCard {...s} delay={0} />
+        </section>
+      </ScrollReveal>
+
+      {/* CORE WORKFLOW */}
+      <ScrollReveal variant="fade-up">
+        <section className="max-w-[1280px] mx-auto px-5 pb-16 space-y-10">
+          <div>
+            <div className="flex items-center gap-2.5 mb-4 px-2">
+              <span className="bg-[var(--arb-bg)] text-[#12AAFF] rounded-xl p-2"><FilePlus size={20} /></span>
+              <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Register</h2>
+            </div>
+            <InfiniteMovingCards items={REGISTER_STEPS} speed="normal" direction="left" renderItem={(s) => (
+              <div className="w-[320px] sm:w-[360px]">
+                <StepCard {...s} delay={0} />
+              </div>
+            )} />
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2.5 mb-4 px-2">
+              <span className="bg-[var(--success-bg)] text-[#00D395] rounded-xl p-2"><Search size={20} /></span>
+              <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Verify</h2>
+            </div>
+            <InfiniteMovingCards items={VERIFY_STEPS} speed="normal" direction="left" renderItem={(s) => (
+              <div className="w-[320px] sm:w-[360px]">
+                <StepCard {...s} delay={0} />
+              </div>
+            )} />
+          </div>
+        </section>
+      </ScrollReveal>
+
+      {/* ARCHITECTURE MAP */}
+      <ScrollReveal variant="fade-up">
+        <section className="max-w-[1280px] mx-auto px-5 pb-16">
+          <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Evidence that survives change.</h2>
+          <p className="text-center text-sm text-[var(--text-3)] mb-8">Each signal catches a different kind of transformation—from exact duplicates to sophisticated synthetic edits.</p>
+          <InfiniteMovingCards items={HASH_TYPES} speed="normal" direction="left" renderItem={(h) => (
+            <div className="w-[320px] sm:w-[360px] h-full">
+              <SpotlightCard className="h-full">
+                <Card hover className="h-full card-hover-glow">
+                  <CardBody className="p-5 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${h.color}15`, color: h.color }}>{h.tag}</span>
+                      <span className="font-bold text-sm text-[var(--text)]">{h.title}</span>
+                    </div>
+                    <p className="text-xs text-[var(--text-3)] leading-relaxed m-0">{h.desc}</p>
+                    <div className="text-[11px] rounded px-2 py-1" style={{ background: `${h.color}10`, color: h.color }}>Use cases: {h.use}</div>
+                  </CardBody>
+                </Card>
+              </SpotlightCard>
             </div>
           )} />
-        </div>
-
-        <div>
-          <div className="flex items-center gap-2.5 mb-4 px-2">
-            <span className="bg-[var(--success-bg)] text-[#00D395] rounded-xl p-2"><Search size={20} /></span>
-            <h2 className="text-2xl font-extrabold text-[var(--text)]">How to Verify</h2>
-          </div>
-          <InfiniteMovingCards items={VERIFY_STEPS} speed="normal" direction="left" renderItem={(s) => (
-            <div className="w-[320px] sm:w-[360px]">
-              <StepCard {...s} delay={0} />
-            </div>
-          )} />
-        </div>
-      </section>
-
-      {/* HASH TYPES INFINITE CAROUSEL */}
-      <section className="max-w-[1280px] mx-auto px-5 pb-16">
-        <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Evidence that survives change.</h2>
-        <p className="text-center text-sm text-[var(--text-3)] mb-8">Each signal catches a different kind of transformation—from exact duplicates to sophisticated synthetic edits.</p>
-        <InfiniteMovingCards items={HASH_TYPES} speed="normal" direction="left" renderItem={(h) => (
-          <div className="w-[320px] sm:w-[360px] h-full">
-            <SpotlightCard className="h-full">
-              <Card hover className="h-full card-hover-glow">
-                <CardBody className="p-5 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: `${h.color}15`, color: h.color }}>{h.tag}</span>
-                    <span className="font-bold text-sm text-[var(--text)]">{h.title}</span>
-                  </div>
-                  <p className="text-xs text-[var(--text-3)] leading-relaxed m-0">{h.desc}</p>
-                  <div className="text-[11px] rounded px-2 py-1" style={{ background: `${h.color}10`, color: h.color }}>Use cases: {h.use}</div>
-                </CardBody>
-              </Card>
-            </SpotlightCard>
-          </div>
-        )} />
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* FAQ */}
+      <ScrollReveal variant="fade-up">
       <section className="max-w-[760px] mx-auto px-5 pb-16">
         <h2 className="text-center text-3xl font-extrabold mb-2 text-[var(--text)]">Questions, answered clearly.</h2>
         <p className="text-center text-sm text-[var(--text-3)] mb-8">The practical details behind VeriTrace, from storage to verification thresholds.</p>
@@ -150,9 +158,11 @@ export default function AboutPage() {
           {FAQ.map((f, i) => <FaqItem key={i} {...f} i={i} />)}
         </Accordion>
       </section>
+      </ScrollReveal>
 
-      {/* CTA */}
-      <AuroraBackground className="py-16 text-center">
+      {/* BOTTOM CTA */}
+      <ScrollReveal variant="fade-up">
+      <AuroraBackground className="py-20 text-center border-t border-[var(--border)]">
         <div className="max-w-[1280px] mx-auto px-5">
           <h2 className="text-3xl font-extrabold mb-3 text-[var(--text)]">Your work deserves durable proof.</h2>
           <p className="text-sm text-[var(--text-2)] mb-8">Create an ownership record today, then verify it anywhere tomorrow.</p>
@@ -162,6 +172,7 @@ export default function AboutPage() {
           </div>
         </div>
       </AuroraBackground>
+      </ScrollReveal>
     </div>
   )
 }

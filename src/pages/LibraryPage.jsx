@@ -13,6 +13,7 @@ import { Alert } from '../components/ui/alert'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
 import PageHero from '../components/PageHero'
+import { ScrollReveal } from '../components/ui/scroll-reveal'
 import { CONTRACT_ADDRESS, CONTRACT_ABI, ARBITRUM_SEPOLIA } from '../config'
 import { Library as LibraryIcon, Eye, ExternalLink, Download, Lock, Shield } from 'lucide-react'
 
@@ -74,6 +75,7 @@ export default function LibraryPage() {
   return (
     <section>
       <PageHero eyebrow="PUBLIC PROVENANCE LEDGER" title="Explore the evidence." description="A transparent, independently auditable record of every media and text proof written to the Arbitrum Sepolia registry." icon={LibraryIcon} />
+      <ScrollReveal variant="fade-up">
       <div className="max-w-[1280px] mx-auto px-5 pt-7">
 
       {error && <div className="mb-5"><Alert variant="danger">{error}</Alert></div>}
@@ -176,6 +178,7 @@ export default function LibraryPage() {
         )}
       </Modal>
       </div>
+      </ScrollReveal>
     </section>
   )
 }

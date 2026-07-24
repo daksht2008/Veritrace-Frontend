@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         primary: 'text-white shadow-md hover:shadow-lg',
         success: 'text-black font-bold shadow-md hover:shadow-lg',
-        outline: 'border bg-transparent hover:bg-[var(--bg-2)]',
+        outline: 'border border-[var(--border-2)] bg-transparent hover:bg-[var(--bg-2)]',
         ghost: 'bg-transparent hover:bg-[var(--bg-2)]',
         danger: 'text-white shadow-md hover:shadow-lg',
         glass: 'glass hover:shadow-md',

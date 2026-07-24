@@ -15,6 +15,7 @@ import { Progress } from '../components/ui/progress'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { ArbitrumLogo } from '../components/ArbitrumLogo'
 import PageHero from '../components/PageHero'
+import { ScrollReveal } from '../components/ui/scroll-reveal'
 import { useUpload } from '../context/UploadContext'
 import { useIntegrityTone } from '../components/providers/ExperienceProvider'
 import { config } from '../wagmiConfig'
@@ -100,10 +101,36 @@ export default function VerifyPage() {
         const exactRes = await fetch(`${CORE_BACKEND_API}/api/v1/verify/exact?hash=0x${sha256Hex}`)
         if (exactRes.ok) {
           const exactData = await exactRes.json()
-          if (exactData.match_found && exactData.record) {
-            const alreadyMatched = matches.some(m => m.assetId?.toLowerCase().includes(sha256Hex.slice(0, 8).toLowerCase()))
-            if (onChainData) setBlockchainRecord(prev => ({ ...prev, mediaS3Url: exactData.record.MediaS3Url, mediaIpfsUrl: exactData.record.MediaIpfsUrl }))
-            if (!alreadyMatched) matches.push({ matchType: 'exact', similarity: 100, assetId: exactData.record.Sha256Hash?.slice(0, 16), sha256: exactData.record.Sha256Hash, mediaType: hashData.media_type || 'unknown', registeredAt: new Date(exactData.record.Timestamp * 1000).toLocaleString(), creator: exactData.record.CreatorAddress, aiTool: exactData.record.AiTool, ipfsCid: exactData.record.IpfsCid, mediaS3Url: exactData.record.MediaS3Url, mediaIpfsUrl: exactData.record.MediaIpfsUrl })
+          if (exactData && exactData.match_found) {
+            const dataMatches = exactData.matches || (exactData.record ? [{ ...exactData.record, similarity: 100, match_type: 'exact' }] : [])
+            for (const item of dataMatches) {
+              const hashKey = item.sha256_hash || item.Sha256Hash
+              if (hashKey) {
+                const alreadyMatched = matches.some(m => m.sha256?.toLowerCase() === hashKey.toLowerCase())
+                if (onChainData && (item.match_type === 'exact' || item.MatchType === 'exact')) {
+                  setBlockchainRecord(prev => ({ ...prev, mediaS3Url: item.media_s3_url || item.MediaS3Url, mediaIpfsUrl: item.media_ipfs_url || item.MediaIpfsUrl }))
+                }
+                if (!alreadyMatched) {
+                  matches.push({
+                    matchType: item.match_type || 'exact',
+                    similarity: item.similarity || 100,
+                    confidenceScore: item.confidence_score || 100,
+                    confidenceTier: item.confidence_tier || 'High',
+                    assetId: hashKey.slice(0, 16),
+                    sha256: hashKey,
+                    mediaType: item.media_type || hashData.media_type || 'unknown',
+                    registeredAt: new Date((item.timestamp || item.Timestamp) * 1000).toLocaleString(),
+                    creator: item.creator_address || item.CreatorAddress,
+                    aiTool: item.ai_tool || item.AiTool,
+                    ipfsCid: item.ipfs_cid || item.IpfsCid,
+                    mediaS3Url: item.media_s3_url || item.MediaS3Url,
+                    mediaIpfsUrl: item.media_ipfs_url || item.MediaIpfsUrl,
+                    onChainVerified: item.on_chain_verified,
+                    onChainTxHash: item.on_chain_tx_hash
+                  })
+                }
+              }
+            }
           }
         }
       } catch (dbErr) { console.warn('Backend exact match failed:', dbErr.message) }
@@ -120,11 +147,41 @@ export default function VerifyPage() {
           const segmentRes = await fetch(`${CORE_BACKEND_API}/api/v1/verify/segments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sha256: '0x' + sha256Hex, media_type: hashData.media_type, audio_hashes: hashData.audio_hashes || [], segments: segmentsPayload }) })
           if (segmentRes.ok) {
             const segmentData = await segmentRes.json()
-            if (segmentData.match_found && segmentData.record) {
-              const existingIndex = matches.findIndex(m => m.assetId?.toLowerCase().includes(segmentData.record.Sha256Hash?.slice(0, 8).toLowerCase()))
-              const newMatch = { matchType: segmentData.is_deepfake ? 'deepfake' : 'similar', isDeepfake: segmentData.is_deepfake, isAudioDeepfake: segmentData.is_audio_deepfake, similarity: segmentData.similarity || 90, temporalIntegrity: segmentData.temporal_integrity, assetId: segmentData.record.Sha256Hash?.slice(0, 16), sha256: segmentData.record.Sha256Hash, mediaType: hashData.media_type || 'unknown', registeredAt: new Date(segmentData.record.Timestamp * 1000).toLocaleString(), creator: segmentData.record.CreatorAddress, aiTool: segmentData.record.AiTool, ipfsCid: segmentData.record.IpfsCid, mediaS3Url: segmentData.record.MediaS3Url, mediaIpfsUrl: segmentData.record.MediaIpfsUrl }
-              if (existingIndex >= 0) { if (segmentData.is_deepfake || matches[existingIndex].matchType !== 'exact') matches[existingIndex] = { ...matches[existingIndex], ...newMatch } }
-              else matches.push(newMatch)
+            if (segmentData.match_found) {
+              const dataMatches = segmentData.matches || (segmentData.record ? [{ ...segmentData.record, similarity: segmentData.similarity, match_type: segmentData.is_deepfake ? 'deepfake' : 'similar', is_deepfake: segmentData.is_deepfake, is_audio_deepfake: segmentData.is_audio_deepfake, temporal_integrity: segmentData.temporal_integrity }] : [])
+              for (const item of dataMatches) {
+                const hashKey = item.sha256_hash || item.Sha256Hash
+                if (hashKey) {
+                  const existingIndex = matches.findIndex(m => m.sha256?.toLowerCase() === hashKey.toLowerCase())
+                  const newMatch = {
+                    matchType: item.match_type || (item.is_deepfake ? 'deepfake' : 'similar'),
+                    isDeepfake: item.is_deepfake,
+                    isAudioDeepfake: item.is_audio_deepfake,
+                    similarity: item.similarity || 90,
+                    confidenceScore: item.confidence_score || item.similarity || 90,
+                    confidenceTier: item.confidence_tier || (item.similarity >= 80 ? 'High' : item.similarity >= 50 ? 'Medium' : 'Low'),
+                    temporalIntegrity: item.temporal_integrity !== undefined ? item.temporal_integrity : segmentData.temporal_integrity,
+                    assetId: hashKey.slice(0, 16),
+                    sha256: hashKey,
+                    mediaType: item.media_type || hashData.media_type || 'unknown',
+                    registeredAt: new Date((item.timestamp || item.Timestamp) * 1000).toLocaleString(),
+                    creator: item.creator_address || item.CreatorAddress,
+                    aiTool: item.ai_tool || item.AiTool,
+                    ipfsCid: item.ipfs_cid || item.IpfsCid,
+                    mediaS3Url: item.media_s3_url || item.MediaS3Url,
+                    mediaIpfsUrl: item.media_ipfs_url || item.MediaIpfsUrl,
+                    onChainVerified: item.on_chain_verified,
+                    onChainTxHash: item.on_chain_tx_hash
+                  }
+                  if (existingIndex >= 0) {
+                    if (newMatch.matchType === 'deepfake' || matches[existingIndex].matchType !== 'exact') {
+                      matches[existingIndex] = { ...matches[existingIndex], ...newMatch }
+                    }
+                  } else {
+                    matches.push(newMatch)
+                  }
+                }
+              }
             }
           }
         }
@@ -143,6 +200,7 @@ export default function VerifyPage() {
   return (
     <section>
       <PageHero eyebrow="AUTHENTICITY INTELLIGENCE" title="See the evidence behind a file." description="Compare content against public records and layered similarity signals to identify originals, likely derivatives, and high-risk alterations." icon={Search} />
+      <ScrollReveal variant="fade-up">
       <div className="max-w-[1280px] mx-auto px-5 pt-7">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-5">
         {/* LEFT */}
@@ -267,6 +325,7 @@ export default function VerifyPage() {
         </div>
       </div>
       </div>
+      </ScrollReveal>
     </section>
   )
 }

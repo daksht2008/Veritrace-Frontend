@@ -9,8 +9,8 @@ export function Card({ className, children, hover = false, ...props }) {
       whileHover={isInteractive ? { y: -6, scale: 1.01 } : undefined}
       transition={isInteractive ? { type: 'spring', stiffness: 200, damping: 20 } : undefined}
       className={cn(
-        'rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition-colors duration-300',
-        hover && 'hover:border-[var(--border-2)] hover:shadow-lg',
+        'rounded-2xl border border-[var(--border-2)] bg-[var(--surface)] transition-colors duration-300',
+        hover && 'hover:border-[var(--arb-border)] hover:shadow-lg',
         className
       )}
       {...props}

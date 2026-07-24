@@ -1,6 +1,7 @@
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { useEffect, useRef, useCallback } from 'react'
 import { useIntegrityTone, useTheme } from './providers/ExperienceProvider'
+import { AuroraBackground } from './ui/aurora-background'
 
 /** Renders a hardware-accelerated dot-matrix overlay via Canvas API. */
 function DotMatrix({ theme }) {
@@ -150,6 +151,9 @@ export default function AmbientBackground() {
       className={`ambient-background ambient-${integrityTone}`}
       aria-hidden="true"
     >
+      {/* Aurora streaks — global ambient aurora animation */}
+      <AuroraBackground className="absolute inset-0 pointer-events-none" showRadialGradient />
+
       {/* Dot-matrix genesis chain overlay */}
       <DotMatrix theme={theme} />
 

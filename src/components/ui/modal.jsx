@@ -20,7 +20,7 @@ export function Modal({ open, onClose, children, className, maxWidth = 'max-w-2x
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className={cn('relative w-full bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl my-8', maxWidth, className)}
+            className={cn('relative w-full bg-[var(--surface)] border border-[var(--border-2)] rounded-2xl shadow-2xl my-8', maxWidth, className)}
             onClick={(e) => e.stopPropagation()}
           >
             {children}

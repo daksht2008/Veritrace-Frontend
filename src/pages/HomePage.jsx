@@ -14,6 +14,8 @@ import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { TextReveal } from '../components/aceternity/TextReveal'
 import { BeamLine } from '../components/aceternity/BeamLine'
 import { ArbitrumLogo, ArbitrumOrbit, AnimatedArbitrumBadge, AnimatedNetworkBadge } from '../components/ArbitrumLogo'
+import { ScrollReveal } from '../components/ui/scroll-reveal'
+import SplitText from '../components/ui/SplitText'
 import { FilePlus, Search, Shield, ArrowRight, Upload, FingerprintPattern as Fingerprint, Wallet, CircleCheck as CheckCircle2, Database, Layers, Sparkles, Zap, Eye, Link2, Cpu, Server, Pin, GitBranch, ChevronRight, ChevronLeft, Image as ImageIcon, Video, FileText, Play, Radio } from 'lucide-react'
 import { SUPPORTED_FILES, CONTRACT_ADDRESS, ARBITRUM_SEPOLIA } from '../config'
 
@@ -56,9 +58,11 @@ export default function HomePage() {
             </div>
 
             <h1 className="home-hero-title text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-5 text-[var(--text)]">
-              Prove what's <span className="gradient-arb">real.</span>
+              <SplitText text="Prove what's" className="inline-block" delay={30} duration={1.0} splitType="words, chars" tag="span" />
+              {" "}
+              <SplitText text="real." className="inline-block" innerClassName="gradient-arb pb-2" delay={30} duration={1.0} splitType="words" tag="span" />
               <br />
-              <span className="text-[var(--text-2)] font-bold">Trace what's not.</span>
+              <SplitText text="Trace what's not." className="text-[var(--text-2)] font-bold inline-block" delay={30} duration={1.0} splitType="words, chars" tag="span" />
             </h1>
 
             <p className="text-base sm:text-lg text-[var(--text-2)] max-w-2xl mx-auto leading-relaxed mb-8">
@@ -96,6 +100,7 @@ export default function HomePage() {
       </AuroraBackground>
 
       {/* ════ STATS ════ */}
+      <ScrollReveal variant="fade-up">
       <section className="max-w-[1280px] mx-auto px-5 -mt-8 relative z-10">
         <SpotlightCard>
           <Card className="overflow-hidden card-hover-glow">
@@ -107,6 +112,7 @@ export default function HomePage() {
           </Card>
         </SpotlightCard>
       </section>
+      </ScrollReveal>
 
       <section className="max-w-[1280px] mx-auto px-5 pt-5">
         <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ type: 'spring', stiffness: 100, damping: 15 }}>
@@ -128,6 +134,7 @@ export default function HomePage() {
       </section>
 
       {/* ════ ON-CHAIN VERIFICATION WORKFLOW ANIMATION ════ */}
+      <ScrollReveal variant="fade-up">
       <section className="max-w-[1280px] mx-auto px-5 py-16">
         <div className="text-center mb-10">
           <Badge variant="arb" className="mb-3"><Zap size={12} /> Live Workflow</Badge>
@@ -163,8 +170,10 @@ export default function HomePage() {
           </div>
         </Card>
       </section>
+      </ScrollReveal>
 
       {/* ════ FEATURE CARDS ════ */}
+      <ScrollReveal variant="fade-up" delay={0.1}>
       <section className="max-w-[1280px] mx-auto px-5 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <FeatureCard to="/register" icon={<FilePlus size={22} />} color="#12AAFF" title="Create a proof" description="Fingerprint your work and commit a clear ownership signal to Arbitrum in a single guided flow." cta="Start registration" delay={0} />
@@ -172,8 +181,10 @@ export default function HomePage() {
           <FeatureCard href={`${ARBITRUM_SEPOLIA.explorer}/address/${CONTRACT_ADDRESS}`} icon={<Shield size={22} />} color="#1B4ADD" title="Public by design" description="Every registration is time-stamped and independently auditable through an on-chain registry." cta="View the contract" delay={0.2} />
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ════ BENTO GRID ════ */}
+      <ScrollReveal variant="fade-up">
       <section className="max-w-[1280px] mx-auto px-5 pb-12">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold mb-2 text-[var(--text)]">Evidence beyond a single hash.</h2>
@@ -233,8 +244,10 @@ export default function HomePage() {
           </SpotlightCard>
         </div>
       </section>
+      </ScrollReveal>
 
       {/* ════ SUPPORTED FORMATS ════ */}
+      <ScrollReveal variant="fade-up">
       <section className="max-w-[1280px] mx-auto px-5 pb-12">
         <Card className="card-hover-glow">
           <div className="px-5 py-4 border-b border-[var(--border)]">
@@ -259,6 +272,7 @@ export default function HomePage() {
           </CardBody>
         </Card>
       </section>
+      </ScrollReveal>
     </>
   )
 }
