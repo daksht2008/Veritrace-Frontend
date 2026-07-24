@@ -147,7 +147,6 @@ body {
 
 /* Persistent site atmosphere — kept below interactive content. */
 .site-content,
-nav,
 footer {
   position: relative;
 }
@@ -616,13 +615,28 @@ footer {
   animation: aurora 12s ease infinite;
 }
 
-/* Aurora-flow for the Aceternity AuroraBackground component */
-@keyframes aurora-flow {
+/* Hardware-accelerated aurora transform animations (composite-only layers) */
+@keyframes aurora-translate-1 {
   0% {
-    background-position: 50% 50%, 50% 50%;
+    transform: translate3d(0%, 0%, 0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translate3d(-10%, 6%, 0) rotate(4deg) scale(1.08);
   }
   100% {
-    background-position: 350% 50%, 350% 50%;
+    transform: translate3d(0%, 0%, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes aurora-translate-2 {
+  0% {
+    transform: translate3d(0%, 0%, 0) rotate(0deg) scale(1.05);
+  }
+  50% {
+    transform: translate3d(8%, -6%, 0) rotate(-4deg) scale(1);
+  }
+  100% {
+    transform: translate3d(0%, 0%, 0) rotate(0deg) scale(1.05);
   }
 }
 
