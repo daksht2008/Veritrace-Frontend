@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { MotionConfig } from 'framer-motion'
 
 const ThemeContext = createContext(null)
@@ -14,6 +15,17 @@ export function ExperienceProvider({ children }) {
   const [theme, setTheme] = useState(getInitialTheme)
   const [integrityTone, setIntegrityTone] = useState('secure')
 
+  const commitTheme = (nextTheme) => {
+    document.documentElement.setAttribute('data-theme', nextTheme)
+    document.documentElement.style.colorScheme = nextTheme
+    localStorage.setItem('theme', nextTheme)
+    flushSync(() => setTheme(nextTheme))
+  }
+
+  const applyTheme = (nextTheme) => {
+    if (nextTheme !== theme) commitTheme(nextTheme)
+  }
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     document.documentElement.style.colorScheme = theme
@@ -22,10 +34,10 @@ export function ExperienceProvider({ children }) {
 
   const value = useMemo(() => ({
     theme,
-    setTheme,
+    setTheme: applyTheme,
     integrityTone,
     setIntegrityTone,
-    toggleTheme: () => setTheme(current => current === 'dark' ? 'light' : 'dark'),
+    toggleTheme: () => applyTheme(theme === 'dark' ? 'light' : 'dark'),
   }), [theme, integrityTone])
 
   return (

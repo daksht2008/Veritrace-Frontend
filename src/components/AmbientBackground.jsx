@@ -72,8 +72,7 @@ function MouseSpotlight({ theme }) {
 
   const handleMouseMove = useCallback((e) => {
     if (!spotRef.current || theme === 'dark') return
-    spotRef.current.style.left = `${e.clientX}px`
-    spotRef.current.style.top = `${e.clientY}px`
+    spotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`
     spotRef.current.style.opacity = '1'
   }, [theme])
 
@@ -97,12 +96,14 @@ function MouseSpotlight({ theme }) {
   return (
     <div
       ref={spotRef}
-      className="absolute pointer-events-none"
+      className="fixed pointer-events-none"
       style={{
+        left: 0,
+        top: 0,
         width: '520px',
         height: '520px',
         borderRadius: '50%',
-        transform: 'translate(-50%, -50%)',
+        transform: 'translate3d(-100%, -100%, 0) translate(-50%, -50%)',
         background: 'radial-gradient(circle, rgba(99,102,241,0.055) 0%, rgba(14,165,233,0.04) 35%, transparent 70%)',
         opacity: 0,
         transition: 'opacity 0.4s ease',
@@ -170,10 +171,10 @@ export default function AmbientBackground() {
           x: [0, 80, -30, 0],
           y: [0, 50, 95, 0],
           scale: [1, 1.16, 0.92, 1],
-          background: [orbs.one.bg, orbs.one.bg],
         }}
         transition={{ duration: isAlert ? 16 : 22, repeat: Infinity, ease: 'easeInOut' }}
         style={{
+          willChange: 'transform',
           background: orbs.one.bg,
           opacity: orbs.one.opacity,
           filter: isLight ? 'blur(110px)' : 'blur(140px)',
@@ -190,6 +191,7 @@ export default function AmbientBackground() {
         }}
         transition={{ duration: isAlert ? 20 : 27, repeat: Infinity, ease: 'easeInOut' }}
         style={{
+          willChange: 'transform',
           background: orbs.two.bg,
           opacity: orbs.two.opacity,
           filter: isLight ? 'blur(120px)' : 'blur(140px)',
@@ -206,6 +208,7 @@ export default function AmbientBackground() {
         }}
         transition={{ duration: isAlert ? 24 : 31, repeat: Infinity, ease: 'easeInOut' }}
         style={{
+          willChange: 'transform',
           background: orbs.three.bg,
           opacity: orbs.three.opacity,
           filter: isLight ? 'blur(100px)' : 'blur(140px)',

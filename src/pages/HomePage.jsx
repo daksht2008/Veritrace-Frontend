@@ -9,10 +9,10 @@ import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
 import { CounterUp } from '../components/aceternity/CounterUp'
 import { ParticleField } from '../components/aceternity/ParticleField'
-import { AuroraBackground } from '../components/aceternity/AuroraBackground'
 import { SpotlightCard } from '../components/aceternity/SpotlightCard'
 import { TextReveal } from '../components/aceternity/TextReveal'
 import { BeamLine } from '../components/aceternity/BeamLine'
+import { Boxes } from '../components/ui/background-boxes'
 import { ArbitrumLogo, ArbitrumOrbit, AnimatedArbitrumBadge, AnimatedNetworkBadge } from '../components/ArbitrumLogo'
 import { ScrollReveal } from '../components/ui/scroll-reveal'
 import SplitText from '../components/ui/SplitText'
@@ -43,12 +43,13 @@ export default function HomePage() {
   return (
     <>
       {/* ════ HERO ════ */}
-      <AuroraBackground className="home-hero pt-14 pb-24">
-        <div className="max-w-[1280px] mx-auto px-5 text-center relative z-10">
-          <ParticleField density={40} />
-
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <div className="flex items-center justify-center gap-3 flex-wrap mb-6">
+      <section className="home-proof-hero">
+        <div className="proof-grid" aria-hidden="true" />
+        <div className="proof-wave proof-wave-one" aria-hidden="true" />
+        <div className="proof-wave proof-wave-two" aria-hidden="true" />
+        <div className="max-w-[1280px] mx-auto px-5 relative z-10 grid lg:grid-cols-[1.05fr_.95fr] gap-12 items-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="lg:text-left text-center">
+            <div className="flex items-center lg:justify-start justify-center gap-3 flex-wrap mb-6">
               <div className="badge-float">
                 <AnimatedArbitrumBadge text="Powered by Arbitrum Stylus" />
               </div>
@@ -57,7 +58,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <h1 className="home-hero-title text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-5 text-[var(--text)]">
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-5 text-[var(--text)]">
               <SplitText text="Prove what's" className="inline-block" delay={30} duration={1.0} splitType="words, chars" tag="span" />
               {" "}
               <SplitText text="real." className="inline-block" innerClassName="gradient-arb pb-2" delay={30} duration={1.0} splitType="words" tag="span" />
@@ -69,7 +70,7 @@ export default function HomePage() {
               Turn every original into a durable, independently verifiable record. Establish ownership, surface derivatives, and protect trust across the open web.
             </p>
 
-            <div className="flex gap-3 justify-center flex-wrap">
+            <div className="flex gap-3 lg:justify-start justify-center flex-wrap">
               <Link to="/register">
                 <Button variant="primary" size="lg">
                   <FilePlus size={18} /> Create a proof
@@ -81,10 +82,7 @@ export default function HomePage() {
                 </Button>
               </Link>
             </div>
-          </motion.div>
-
-          {/* Search bar */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="max-w-2xl mx-auto mt-10">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="max-w-2xl lg:mx-0 mx-auto mt-10">
             <div className="flex glass rounded-2xl overflow-hidden border border-[var(--border)] hover:border-[#12AAFF] transition-colors">
               <select className="px-4 py-3.5 text-sm font-medium bg-transparent border-r border-[var(--border)] text-[var(--text-2)] outline-none cursor-pointer">
                 <option value="all">All Filters</option>
@@ -95,9 +93,24 @@ export default function HomePage() {
               <input type="text" placeholder="Search a proof, wallet, or transaction" spellCheck="false" autoComplete="off" className="flex-1 px-4 py-3.5 text-sm bg-transparent outline-none font-mono text-[var(--text)] placeholder:text-[var(--text-4)] placeholder:font-sans min-w-0" />
               <Button variant="primary" className="rounded-none px-5"><Search size={18} /></Button>
             </div>
+            </motion.div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, x: 28 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.65, delay: 0.12 }} className="proof-network-scene" aria-label="Proof network visualization">
+            <Boxes className="proof-network-boxes" />
+            <div className="proof-scan" aria-hidden="true" />
+            <div className="proof-pulse proof-pulse-one" aria-hidden="true" />
+            <div className="proof-pulse proof-pulse-two" aria-hidden="true" />
+            <div className="proof-network-line proof-network-line-one" />
+            <div className="proof-network-line proof-network-line-two" />
+            <div className="proof-network-line proof-network-line-three" />
+            <div className="proof-node proof-node-source"><Upload size={18} /><span>Original</span></div>
+            <div className="proof-node proof-node-hash"><Fingerprint size={20} /><span>Fingerprint</span></div>
+            <div className="proof-node proof-node-chain"><Shield size={18} /><span>On-chain</span></div>
+            <div className="proof-node proof-node-verified"><CheckCircle2 size={18} /><span>Verified</span></div>
+            <div className="proof-packet"><span className="live-dot" /> PROOF PACKET <strong>0x8a...d21</strong></div>
           </motion.div>
         </div>
-      </AuroraBackground>
+      </section>
 
       {/* ════ STATS ════ */}
       <ScrollReveal variant="fade-up">

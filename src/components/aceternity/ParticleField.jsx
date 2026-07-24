@@ -1,12 +1,15 @@
 import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
+import { useTheme } from '../providers/ExperienceProvider'
 
 /**
  * ParticleField — Canvas-based animated particle network
- * Arbitrum-blue particles connected by lines, subtle drift
+ * Highly optimized: uses useTheme hook to avoid DOM queries in the render loop,
+ * pre-parses colors to integers once, and uses rgba string template to avoid hex conversion GC pressure.
  */
 export function ParticleField({ className, density = 50, color = '#12AAFF' }) {
   const canvasRef = useRef(null)
+  const { theme } = useTheme()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -15,8 +18,17 @@ export function ParticleField({ className, density = 50, color = '#12AAFF' }) {
     let raf
     let particles = []
 
+    // Pre-parse hex color to RGB integers
+    const hex = color.replace('#', '')
+    const r = parseInt(hex.substring(0, 2), 16) || 18
+    const g = parseInt(hex.substring(2, 4), 16) || 170
+    const b = parseInt(hex.substring(4, 6), 16) || 255
+    const opacityBase = theme === 'dark' ? 0.5 : 0.25
+    const fillStyleStr = `rgba(${r}, ${g}, ${b}, ${theme === 'dark' ? '0.37' : '0.25'})`
+
     const resize = () => {
       const parent = canvas.parentElement
+      if (!parent) return
       canvas.width = parent.offsetWidth
       canvas.height = parent.offsetHeight
       particles = Array.from({ length: density }, () => ({
@@ -30,8 +42,6 @@ export function ParticleField({ className, density = 50, color = '#12AAFF' }) {
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      const theme = document.documentElement.getAttribute('data-theme') || 'dark'
-      const opacity = theme === 'dark' ? 0.5 : 0.25
 
       particles.forEach((p, i) => {
         p.x += p.vx
@@ -41,7 +51,7 @@ export function ParticleField({ className, density = 50, color = '#12AAFF' }) {
 
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = color + (theme === 'dark' ? '60' : '40')
+        ctx.fillStyle = fillStyleStr
         ctx.fill()
 
         for (let j = i + 1; j < particles.length; j++) {
@@ -52,7 +62,8 @@ export function ParticleField({ className, density = 50, color = '#12AAFF' }) {
             ctx.beginPath()
             ctx.moveTo(p.x, p.y)
             ctx.lineTo(particles[j].x, particles[j].y)
-            ctx.strokeStyle = color + Math.floor(opacity * 255 * (1 - dist / 120)).toString(16).padStart(2, '0')
+            const alpha = (opacityBase * (1 - dist / 120)).toFixed(2)
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`
             ctx.lineWidth = 0.5
             ctx.stroke()
           }
@@ -64,8 +75,11 @@ export function ParticleField({ className, density = 50, color = '#12AAFF' }) {
     resize()
     draw()
     window.addEventListener('resize', resize)
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
-  }, [density, color])
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+    }
+  }, [density, color, theme])
 
   return (
     <canvas

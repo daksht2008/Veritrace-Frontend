@@ -195,7 +195,7 @@ function StepCard({ num, title, desc, icon: Icon, color, delay }) {
 
 function FaqItem({ q, a, i }) {
   return (
-    <AccordionItem value={`item-${i}`} className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl overflow-hidden hover:border-[var(--border-2)] transition-colors mb-3 px-2 border-b-0">
+    <AccordionItem value={`item-${i}`} className="bg-[var(--surface)] border-2 border-[var(--border)] rounded-2xl overflow-hidden hover:border-[var(--border-2)] transition-colors mb-3">
       <AccordionTrigger className="p-4 font-semibold text-sm hover:no-underline text-[var(--text)] data-[state=open]:text-[#12AAFF] [&[data-state=open]>svg]:rotate-180">
         {q}
       </AccordionTrigger>
